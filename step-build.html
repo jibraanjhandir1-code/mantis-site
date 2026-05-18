@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build & Test — VELOXIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/benguiat-bk-bt" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#000;--void:#030303;--deep:#060606;--dark:#0a0a0a;
+  --charcoal:#111;--graphite:#1a1a1a;--steel:#222;--grey:#333;
+  --mid:#555;--silver:#777;--light:#999;--pale:#bbb;
+  --off-white:#ddd;--white:#f0f0f2;--pure:#fff;
+  --font:'Benguiat Bk BT','Georgia',serif;
+  --mono:'Space Mono',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --max-w:1200px;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden;font-size:16px}
+a{color:inherit;text-decoration:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 clamp(20px,4vw,56px)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 clamp(20px,4vw,56px);height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.82);backdrop-filter:blur(30px);border-bottom:1px solid rgba(255,255,255,.05)}
+.nav-logo{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--pure);display:flex;align-items:center;gap:7px}
+.nav-logo .mk{width:8px;height:8px;border:1.5px solid var(--pure);transform:rotate(45deg)}
+.nav-back{font-family:var(--mono);font-size:11px;color:var(--silver);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px;transition:color .3s}
+.nav-back:hover{color:var(--pure)}
+.nav-back svg{transition:transform .3s var(--ease)}
+.nav-back:hover svg{transform:translateX(-3px)}
+.page-hero{padding:130px clamp(20px,4vw,56px) 80px;border-bottom:1px solid rgba(255,255,255,.05)}
+.phase-tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--silver);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.phase-tag::before{content:'03';font-size:28px;font-weight:700;color:rgba(255,255,255,.06);letter-spacing:-.02em;font-family:var(--font)}
+.page-title{font-size:clamp(36px,5vw,64px);font-weight:700;line-height:1.05;letter-spacing:-.02em;color:var(--pure);margin-bottom:20px;max-width:700px}
+.page-sub{font-size:clamp(15px,1.5vw,18px);color:var(--light);max-width:560px;line-height:1.8}
+.content{padding:80px 0}
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.section-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver);margin-bottom:24px;opacity:.5}
+.prose h3{font-size:22px;font-weight:700;color:var(--pure);margin-bottom:14px;line-height:1.3}
+.prose p{font-size:15px;color:var(--light);line-height:1.85;margin-bottom:20px}
+.prose p:last-child{margin-bottom:0}
+.prose strong{color:var(--off-white);font-weight:700}
+.sidebar{position:sticky;top:90px}
+.info-block{border:1px solid rgba(255,255,255,.05);padding:28px;margin-bottom:16px;background:var(--deep)}
+.info-block h4{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--silver);margin-bottom:16px;opacity:.45}
+.info-list{display:flex;flex-direction:column;gap:10px}
+.info-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--off-white);line-height:1.55}
+.info-list li::before{content:'◆';font-size:6px;color:var(--silver);flex-shrink:0;margin-top:5px}
+.stat-row{display:flex;gap:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);margin-top:20px}
+.stat strong{display:block;font-family:var(--mono);font-size:24px;font-weight:700;color:var(--pure)}
+.stat span{font-size:11px;color:var(--mid)}
+.deliverables{padding:60px 0;border-top:1px solid rgba(255,255,255,.05)}
+.deliverables h2{font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--pure);margin-bottom:36px}
+.del-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.03)}
+.del-card{background:var(--deep);padding:28px}
+.del-card h4{font-size:15px;font-weight:700;color:var(--pure);margin-bottom:8px}
+.del-card p{font-size:13px;color:var(--silver);line-height:1.7}
+.next-step{padding:60px 0;border-top:1px solid rgba(255,255,255,.05)}
+.next-label{font-family:var(--mono);font-size:10px;color:var(--silver);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;opacity:.5}
+.next-title{font-size:20px;font-weight:700;color:var(--pure)}
+.btn-p{display:inline-flex;align-items:center;gap:8px;background:var(--pure);color:var(--black);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;transition:all .3s var(--ease)}
+.btn-p:hover{box-shadow:0 0 30px rgba(255,255,255,.1);transform:translateY(-2px)}
+.btn-p svg{transition:transform .3s}.btn-p:hover svg{transform:translateX(3px)}
+.btn-g{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--white);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;border:1px solid rgba(255,255,255,.1);transition:all .3s var(--ease)}
+.btn-g:hover{border-color:rgba(255,255,255,.3);color:var(--pure)}
+.footer{border-top:1px solid rgba(255,255,255,.05);padding:36px 0;background:var(--black)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center}
+.footer-bottom p{font-family:var(--mono);font-size:10px;color:var(--mid);letter-spacing:.04em}
+.circuit-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.02;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@media(max-width:768px){
+  .content-grid{grid-template-columns:1fr;gap:40px}
+  .sidebar{position:static}
+  .del-grid{grid-template-columns:1fr}
+  .btn-p,.btn-g{width:100%;justify-content:center;padding:14px 20px}
+  .stat-row{flex-wrap:wrap}
+  .page-hero{padding:100px clamp(20px,4vw,56px) 60px}
+}
+@media(max-width:480px){
+  .page-title{font-size:clamp(28px,8vw,40px)}
+}
+</style>
+</head>
+<body>
+<canvas class="circuit-canvas" id="circuitCanvas"></canvas>
+
+<nav class="nav">
+  <a href="AUTOMATION WEBSITE.html" class="nav-logo"><span class="mk"></span>VELOXIS</a>
+  <a href="AUTOMATION WEBSITE.html#process" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M12.5 8H3.5M3.5 8L7.5 4M3.5 8L7.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to Process
+  </a>
+</nav>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="phase-tag">Phase Three — Build & Test</div>
+    <h1 class="page-title">We build in stages. We test with your actual data.</h1>
+    <p class="page-sub">A working prototype isn't a finished system. We run every workflow through real conditions — including the ones that are supposed to be impossible — before anything touches your live operation.</p>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container">
+    <div class="content-grid">
+      <div class="prose">
+        <div class="section-label">What Actually Happens</div>
+        <h3>We build one workflow at a time, not all at once.</h3>
+        <p>The build phase doesn't start with a big reveal at the end. We build incrementally — one workflow completed, reviewed, and signed off before the next one starts. That way, if something needs to change, it doesn't cascade through everything else that's already been built.</p>
+        <p>You get visibility throughout. We share a running status of what's complete, what's in progress, and what's queued. If you want to see a workflow running live before it's finished, you can. Most clients check in two or three times during the build and catch at least one thing they want adjusted — things that would have been fine if we hadn't shown them early.</p>
+        <h3>Testing is not clicking through once and calling it done.</h3>
+        <p>We run three categories of tests on every workflow before it's considered finished. <strong>Happy path testing</strong> confirms the system works as designed when everything goes normally. <strong>Edge case testing</strong> throws the weird stuff at it — duplicate submissions, missing fields, inputs in unexpected formats, API responses that time out halfway through. <strong>Volume testing</strong> runs the system at scale to make sure it holds up when 200 records come in at once instead of five.</p>
+        <p>We use real data from your operation — anonymized if needed — because synthetic test data never tells you what your actual data will. The number of issues that only appear with real-world inputs is not small.</p>
+        <h3>Client sign-off before anything goes near production.</h3>
+        <p>When we've completed testing on our end, we run the workflow with you present so you can see it operate against live data in a staging environment. <strong>You approve the output before we flip anything on.</strong> If something's off — even something subjective, like the phrasing of an automated email — we fix it before go-live, not after.</p>
+      </div>
+
+      <div class="sidebar">
+        <div class="info-block">
+          <h4>What We Build & Test</h4>
+          <ul class="info-list">
+            <li>Full workflow construction per approved architecture</li>
+            <li>API authentication and connection setup</li>
+            <li>Data transformation and mapping logic</li>
+            <li>Conditional branching and decision trees</li>
+            <li>Error handling and retry mechanisms</li>
+            <li>Notification and alerting triggers</li>
+            <li>Happy path, edge case, and volume testing</li>
+          </ul>
+          <div class="stat-row">
+            <div class="stat"><strong>1–3</strong><span>Weeks typical</span></div>
+            <div class="stat"><strong>0</strong><span>Shortcuts taken</span></div>
+          </div>
+        </div>
+        <div class="info-block">
+          <h4>What You'll Receive</h4>
+          <ul class="info-list">
+            <li>Fully built and tested workflows in staging</li>
+            <li>Test results report with edge cases documented</li>
+            <li>Live demo walkthrough with your team</li>
+            <li>Final approval sign-off before deployment</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="deliverables">
+  <div class="container">
+    <h2>What you walk away with.</h2>
+    <div class="del-grid">
+      <div class="del-card">
+        <h4>Tested, Working System</h4>
+        <p>Not a prototype — a fully functional system that's been run against real conditions and signed off by your team before it touches production.</p>
+      </div>
+      <div class="del-card">
+        <h4>Test Results Report</h4>
+        <p>A record of every test scenario we ran, what passed, what failed, and how we resolved it. Useful documentation if anything ever needs revisiting.</p>
+      </div>
+      <div class="del-card">
+        <h4>Team Walkthrough</h4>
+        <p>A live session where we walk your team through the system — how it works, what triggers it, and what to check if something looks off.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="next-step">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:28px">
+    <div>
+      <div class="next-label">Up Next — Phase 04</div>
+      <div class="next-title">Deploy & Optimize: it goes live.</div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a href="step-deploy.html" class="btn-p">Next Phase <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3.5 8H12.5M12.5 8L8.5 4M12.5 8L8.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="AUTOMATION WEBSITE.html#contact" class="btn-g">Book Discovery Call</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <p>© 2026 VELOXIS. All rights reserved.</p>
+      <p>Foundational Automation. Delivered Today.™</p>
+    </div>
+  </div>
+</footer>
+
+<script src="particles.js"></script>
+</body>
+</html>
