@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mantis — Intelligent Automation Systems</title>
+<meta name="description" content="Mantis builds enterprise-grade automation systems that eliminate manual work, reduce errors by 97%, and scale operations without scaling headcount.">
+<meta name="theme-color" content="#0a0b0e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0b0e; --bg2:#070709; --panel:#0d0e12; --panel2:#101218;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.04);
+  --text:#e9e9ec; --soft:#b6b6bb; --muted:#86868c; --dim:#56565c;
+  --accent:#cfcabd;            /* warm off-white, no glow */
+  --serif:'EB Garamond','Times New Roman',Georgia,serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--serif);background:radial-gradient(130% 100% at 50% 32%,#11131a 0%,#0a0b0e 58%,#060608 100%);
+  color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6;font-size:17px}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+ul{list-style:none}
+::selection{background:#e9e9ec;color:#0a0b0e}
+
+/* ── STAGE ── */
+#scene{position:fixed;inset:0;z-index:0;display:block;touch-action:none}
+#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(125% 105% at 50% 40%,transparent 38%,rgba(0,0,0,.45) 80%,rgba(0,0,0,.85) 100%)}
+#grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── HUD ── */
+.hud{position:fixed;z-index:6;pointer-events:none}
+.label-x{font-family:var(--serif);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted)}
+.brand{top:26px;left:clamp(20px,4vw,52px);display:flex;align-items:center;gap:11px;font-size:18px;
+  letter-spacing:.36em;text-transform:uppercase;color:var(--text)}
+.brand .mk{width:8px;height:8px;border:1px solid var(--soft);transform:rotate(45deg)}
+.status{top:30px;right:clamp(20px,4vw,52px);display:flex;align-items:center;gap:9px;text-align:right;
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.status .blink{width:4px;height:4px;border-radius:50%;background:var(--soft);animation:blink 2.6s infinite}
+@keyframes blink{0%,100%{opacity:.9}50%{opacity:.2}}
+.coord{position:fixed;z-index:6;font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.14);pointer-events:none}
+.coord.bl{bottom:24px;left:clamp(20px,4vw,52px)}
+.coord.br{bottom:24px;right:clamp(20px,4vw,52px)}
+
+.tagline{position:fixed;left:0;right:0;bottom:8vh;z-index:5;text-align:center;pointer-events:none;padding:0 20px}
+.tagline h1{font-size:clamp(26px,4vw,52px);font-weight:400;letter-spacing:.01em;line-height:1.1;color:var(--text)}
+.tagline h1 em{font-style:italic;color:var(--soft)}
+.tagline p{margin-top:14px;font-size:clamp(14px,1.4vw,17px);color:var(--soft);max-width:560px;margin-inline:auto;font-style:italic}
+.hint{margin-top:20px;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim);
+  display:inline-flex;align-items:center;gap:9px}
+.hint .dot{width:4px;height:4px;border:1px solid var(--dim);transform:rotate(45deg)}
+
+/* ── METRICS ── */
+.metricbar{position:fixed;top:66px;left:0;right:0;z-index:5;display:flex;justify-content:center;gap:clamp(20px,4vw,56px);
+  pointer-events:none;flex-wrap:wrap;padding:0 16px}
+.metricbar .m{text-align:center}
+.metricbar .mv{font-size:clamp(18px,2vw,26px);color:var(--text);letter-spacing:.02em}
+.metricbar .ml{font-size:11px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+
+/* ── NAV CREATURE LABELS ── */
+#labels{position:fixed;inset:0;z-index:4;pointer-events:none}
+.nlabel{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:9px;will-change:transform,opacity;transition:opacity .3s}
+.nlabel .ring{width:30px;height:30px;border:1px solid rgba(255,255,255,.18);border-radius:50%;
+  display:grid;place-items:center;transition:all .35s var(--ease)}
+.nlabel .ring i{width:4px;height:4px;border-radius:50%;background:var(--soft);transition:all .35s var(--ease)}
+.nlabel .tag{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);white-space:nowrap;
+  transition:color .35s var(--ease)}
+.nlabel:hover .ring{border-color:var(--text);transform:scale(1.12)}
+.nlabel:hover .ring i{transform:scale(1.6);background:var(--text)}
+.nlabel:hover .tag{color:var(--text)}
+
+/* ── SECTION OVERLAY ── */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(6,6,8,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;overflow-y:auto;padding:96px clamp(20px,5vw,64px) 80px}
+.overlay.open{opacity:1;pointer-events:auto}
+.overlay-inner{max-width:1120px;margin:0 auto;transform:translateY(26px);opacity:0;transition:all .6s var(--ease) .05s}
+.overlay.open .overlay-inner{transform:none;opacity:1}
+.ov-close{position:fixed;top:24px;right:clamp(20px,4vw,52px);z-index:60;width:42px;height:42px;border:1px solid var(--line);
+  display:grid;place-items:center;font-size:20px;color:var(--muted);background:rgba(0,0,0,.4);transition:all .3s;pointer-events:auto}
+.ov-close:hover{color:var(--text);border-color:var(--soft)}
+.ov-back{position:fixed;top:30px;left:clamp(20px,4vw,52px);z-index:60;font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);display:inline-flex;align-items:center;gap:9px;pointer-events:auto;transition:color .3s}
+.ov-back:hover{color:var(--text)}
+
+.dlabel{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.dlabel::before{content:'';width:6px;height:6px;border:1px solid var(--soft);transform:rotate(45deg)}
+.stitle{font-size:clamp(28px,4vw,48px);font-weight:400;line-height:1.12;letter-spacing:.005em;color:var(--text);margin-bottom:16px}
+.stitle em{font-style:italic;color:var(--soft)}
+.sdesc{font-size:clamp(15px,1.5vw,18px);color:var(--soft);max-width:580px;line-height:1.7;margin-bottom:44px;font-style:italic}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line2)}
+.card{background:var(--panel);padding:clamp(24px,2.8vw,36px);transition:background .4s}
+.card:hover{background:var(--panel2)}
+.card .num{font-size:12px;color:var(--muted);letter-spacing:.24em;margin-bottom:18px}
+.card h3{font-size:19px;font-weight:500;color:var(--text);margin-bottom:9px;line-height:1.3}
+.card p{font-size:15px;color:var(--muted);line-height:1.7}
+.card .tag{font-size:12px;color:var(--dim);letter-spacing:.14em;margin-top:18px;display:block;text-transform:uppercase}
+.cardm{display:flex;gap:24px;padding-top:16px;margin-top:16px;border-top:1px solid var(--line2)}
+.cardm strong{display:block;font-size:21px;color:var(--text);font-weight:500}
+.cardm span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+
+.fpanel{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line2);margin-bottom:1px}
+.fpanel .ftxt,.fpanel .fvis{background:var(--panel);padding:clamp(28px,3.2vw,48px)}
+.fpanel .fvis{display:grid;place-items:center;background:var(--bg2);min-height:240px}
+.fpanel h3{font-size:clamp(19px,2vw,24px);font-weight:500;color:var(--text);margin:6px 0 13px;line-height:1.25}
+.fpanel p{font-size:15px;color:var(--soft);line-height:1.7;margin-bottom:20px}
+.flist li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--soft);margin-bottom:9px}
+.flist li::before{content:'';width:5px;height:5px;border:1px solid var(--muted);transform:rotate(45deg);flex-shrink:0}
+
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+.pcard{border:1px solid var(--line);padding:clamp(26px,3vw,36px);background:var(--panel);transition:border-color .3s}
+.pcard:hover{border-color:rgba(255,255,255,.16)}
+.pcard.feat{border-color:var(--soft);position:relative}
+.pcard.feat::before{content:'RECOMMENDED';position:absolute;top:-10px;left:20px;font-size:10px;letter-spacing:.22em;
+  background:var(--text);color:var(--bg);padding:3px 12px}
+.pcard .tier{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.pcard .amt{font-size:34px;color:var(--text);margin-bottom:6px}
+.pcard .amt span{font-size:14px;color:var(--dim)}
+.pcard .pd{font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.pcard ul li{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--soft);margin-bottom:8px}
+.pcard ul li::before{content:'';width:4px;height:4px;border:1px solid var(--muted);transform:rotate(45deg);flex-shrink:0}
+.pbtn{display:block;text-align:center;padding:13px;margin-top:24px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;transition:all .3s}
+.pbtn-f{background:var(--text);color:var(--bg)}.pbtn-f:hover{background:#fff}
+.pbtn-o{border:1px solid var(--line);color:var(--text)}.pbtn-o:hover{border-color:var(--soft)}
+
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tcard{border:1px solid var(--line);padding:clamp(22px,2.6vw,32px);background:var(--panel)}
+.tcard blockquote{font-size:15px;color:var(--soft);line-height:1.8;margin-bottom:18px;font-style:italic}
+.tcard .who{display:flex;align-items:center;gap:12px}
+.tcard .av{width:38px;height:38px;border:1px solid var(--line);display:grid;place-items:center;font-size:13px;color:var(--soft)}
+.tcard .nm{font-size:15px;color:var(--text)}
+.tcard .rl{font-size:12px;color:var(--dim)}
+
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0;font-size:18px;color:var(--text);text-align:left}
+.faq-q .ic{width:18px;height:18px;flex-shrink:0;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);transition:transform .3s;font-size:14px}
+.faq-item.open .faq-q .ic{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .45s var(--ease)}
+.faq-item.open .faq-a{max-height:240px}
+.faq-a p{padding-bottom:20px;font-size:15px;color:var(--muted);line-height:1.8}
+
+.cform{display:flex;flex-direction:column;gap:11px;margin:8px 0 14px;max-width:540px}
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cform input,.cform select,.cform textarea{width:100%;background:transparent;border:1px solid var(--line);padding:13px 16px;
+  font-family:var(--serif);font-size:15px;color:var(--text);outline:none;transition:border-color .3s}
+.cform input::placeholder,.cform textarea::placeholder{color:var(--dim)}
+.cform input:focus,.cform select:focus,.cform textarea:focus{border-color:var(--soft)}
+.cform select{appearance:none;cursor:pointer;color:var(--dim)}
+.cform select option{background:var(--panel);color:var(--text)}
+.cform textarea{resize:vertical;min-height:100px}
+.csub{background:var(--text);color:var(--bg);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:15px;transition:background .3s}
+.csub:hover{background:#fff}
+.cnote{font-size:12px;color:var(--dim)}
+
+/* ── EVOLUTION ── */
+.evo{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(30px,5vw,70px);align-items:center;margin-top:10px}
+.evo-stage{position:relative;aspect-ratio:1;max-width:440px;width:100%;margin:0 auto;border:1px solid var(--line);display:grid;place-items:center;background:var(--bg2)}
+.evo-stage svg{width:70%;height:70%;overflow:visible}
+.evo-svg{position:absolute;opacity:0;transform:scale(.92);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.evo-svg.on{opacity:1;transform:none}
+.evo-svg path,.evo-svg line,.evo-svg circle,.evo-svg ellipse,.evo-svg polyline{stroke:var(--soft);fill:none;stroke-width:1.4;
+  stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.evo-svg .fillsoft{fill:rgba(255,255,255,.04)}
+.evo-stage .stagecount{position:absolute;bottom:16px;left:18px;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase}
+.evo-info .phase-no{font-size:12px;letter-spacing:.28em;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.evo-info h3{font-size:clamp(22px,2.8vw,32px);font-weight:400;color:var(--text);margin-bottom:14px;line-height:1.15}
+.evo-info p{font-size:15px;color:var(--soft);line-height:1.8;margin-bottom:26px;max-width:440px}
+.evo-dots{display:flex;gap:10px;margin-bottom:24px}
+.evo-dot{flex:1;height:1px;background:rgba(255,255,255,.12);cursor:pointer;position:relative;overflow:hidden}
+.evo-dot i{position:absolute;inset:0;background:var(--text);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.evo-dot.on i{transform:scaleX(1)}
+.evo-meta{display:flex;gap:10px;flex-wrap:wrap}
+.evo-meta button{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:8px 14px;transition:all .3s}
+.evo-meta button.on{color:var(--bg);background:var(--text);border-color:var(--text)}
+.evo-meta button:hover{color:var(--text)}.evo-meta button.on:hover{color:var(--bg)}
+
+/* loader / notice */
+#loader{position:fixed;inset:0;z-index:100;background:#070709;display:grid;place-items:center;transition:opacity .9s ease}
+#loader.gone{opacity:0;pointer-events:none}
+#loader .l{font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:14px}
+#loader .l .mk{width:8px;height:8px;border:1px solid var(--soft);transform:rotate(45deg);animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(405deg)}}
+#notice{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:7;max-width:760px;
+  font-size:12px;letter-spacing:.04em;color:var(--muted);text-align:center;background:rgba(0,0,0,.5);
+  border:1px solid var(--line);padding:9px 16px;display:none}
+#notice.show{display:block}
+#notice code{color:var(--soft)}
+
+/* intro fade-in */
+.hud,.coord,.metricbar,.tagline,#labels{opacity:0;transition:opacity 1.3s ease}
+body.ready .hud,body.ready .coord{opacity:1}
+body.ready .metricbar{opacity:1;transition-delay:.3s}
+body.ready .tagline{opacity:1;transition-delay:.55s}
+body.ready #labels{opacity:1;transition-delay:.85s}
+
+@media(max-width:880px){
+  .grid3,.price-grid,.tgrid{grid-template-columns:1fr}
+  .fpanel{grid-template-columns:1fr}
+  .evo{grid-template-columns:1fr;gap:30px}
+  .metricbar{display:none}.crow{grid-template-columns:1fr}.tagline{bottom:6vh}
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="l"><span class="mk"></span>Mantis</div></div>
+
+<canvas id="scene"></canvas>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<div class="hud brand"><span class="mk"></span>Mantis</div>
+<div class="hud status"><span class="blink"></span>System Online — Accepting Clients Q2 2026</div>
+<div class="coord bl">51.0447° N / 114.0719° W</div>
+<div class="coord br" id="fpsout">—</div>
+
+<div class="metricbar" id="metricbar">
+  <div class="m"><div class="mv" data-count="2400">0</div><div class="ml">Hours Saved / Mo</div></div>
+  <div class="m"><div class="mv" data-count="97" data-suffix="%">0</div><div class="ml">Error Reduction</div></div>
+  <div class="m"><div class="mv" data-count="340" data-suffix="%">0</div><div class="ml">Average ROI</div></div>
+  <div class="m"><div class="mv" data-count="48" data-suffix="hr">0</div><div class="ml">Avg Deployment</div></div>
+</div>
+
+<div class="tagline">
+  <h1>Automate the machine. <em>Scale the outcome.</em></h1>
+  <p>Intelligent automation systems that eliminate manual work — engineered around how your business actually runs.</p>
+  <div class="hint"><span class="dot"></span>Move to guide the claws · Click a creature to explore</div>
+</div>
+
+<div id="labels"></div>
+
+<div id="notice"></div>
+
+<!-- section overlay -->
+<div class="overlay" id="overlay">
+  <a class="ov-back" id="ovBack">← Back to the hive</a>
+  <button class="ov-close" id="ovClose">×</button>
+  <div class="overlay-inner" id="ovInner"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+/* ============================================================= *
+ *  MODEL CONFIG  —  drop your .glb files in ./models/ and tune here
+ *  (filenames map to the nine robotic insects from the reference)
+ * ============================================================= */
+const _qs = new URLSearchParams(location.search);
+const PROC_CLAWS = false;   // grafted procedural claws onto a GLB (off)
+const PROCEDURAL = !_qs.has('glb');   // build the whole mantis procedurally (default). ?glb = load mantis.glb instead
+const MODELS_DIR = 'models/';
+const MANTIS = {
+  file: 'mantis.glb',
+  scale: null,           // null = auto-fit to ~targetSize; or a number
+  targetHeight: 8.5,     // largest-dimension size when auto-fitting
+  rotation: [0, -0.25, 0],// radians [x,y,z] — slight 3/4 toward the camera (procedural faces +Z)
+  offset: [0, 0, 0],     // post-fit position nudge
+  // names of the LEFT / RIGHT raptorial-claw bones or nodes (filled once your model is in).
+  // leave empty → the whole mantis gently leans toward the cursor as a fallback.
+  clawLeft:  [],
+  clawRight: [],
+  clawAimAxis: 'z',      // which local axis of the claw node points "outward" (x|y|z, prefix - to flip)
+};
+if(_qs.has('roty')) MANTIS.rotation[1] = parseFloat(_qs.get('roty'));   // dev: sweep facing
+// section id → bug model file + display tag + the archetype it represents
+const SECTIONS = [
+  { id:'services',     tag:'Systems',   file:'spider.glb'      },
+  { id:'process',      tag:'Process',   file:'grasshopper.glb' },
+  { id:'features',     tag:'Platform',  file:'ant.glb'         },
+  { id:'cases',        tag:'Results',   file:'ladybug.glb'     },
+  { id:'testimonials', tag:'Voices',    file:'moth.glb'        },
+  { id:'pricing',      tag:'Pricing',   file:'bee.glb'         },
+  { id:'faq',          tag:'Questions', file:'dragonfly.glb'   },
+  { id:'contact',      tag:'Deploy',    file:'centipede.glb'   },
+];
+const INSPECT = location.search.includes('inspect');  // ?inspect → log model node names
+const RECOLOR  = !location.search.includes('raw');     // default: black & silver metal. ?raw = keep original textures
+const GROUND_Y = -1.85;                                 // floor height — the mantis is dropped onto it
+
+/* ============================================================= *
+ *  RENDERER / SCENE / CAMERA
+ * ============================================================= */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0b0e);
+scene.fog = new THREE.FogExp2(0x0a0b0e, 0.022);
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 200);
+camera.position.set(0, 1.1, 9.5);
+camera.lookAt(0, 0.4, 0);
+const camBase = camera.position.clone();
+
+// neutral studio environment so black metal reads with soft reflections (like the reference photos)
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+
+/* neutral white studio lighting only — no colour, no glow */
+const hemi = new THREE.HemisphereLight(0xdfe3ea, 0x080809, 0.6); scene.add(hemi);
+const keyL = new THREE.DirectionalLight(0xffffff, 2.7); keyL.position.set(5, 9, 7);
+keyL.castShadow = true; keyL.shadow.mapSize.set(2048,2048);
+keyL.shadow.camera.near=1; keyL.shadow.camera.far=40;
+keyL.shadow.camera.left=-8; keyL.shadow.camera.right=8; keyL.shadow.camera.top=8; keyL.shadow.camera.bottom=-8;
+keyL.shadow.bias=-0.0004; scene.add(keyL);
+const fillL = new THREE.DirectionalLight(0xc9d2e0, 0.5); fillL.position.set(-7, 3, 5); scene.add(fillL);
+const rimL  = new THREE.DirectionalLight(0xffffff, 0.7); rimL.position.set(-3, 4, -8); scene.add(rimL);
+
+/* reflective concrete floor, like the photographs */
+const floorMat = new THREE.MeshStandardMaterial({ color:0x101216, metalness:0.5, roughness:0.62 });
+const floor = new THREE.Mesh(new THREE.CircleGeometry(40, 80), floorMat);
+floor.rotation.x = -Math.PI/2; floor.position.y = -1.85; floor.receiveShadow = true; scene.add(floor);
+
+/* faint starfield (Samana-style depth) */
+(function stars(){
+  const N = 700, pos = new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const r = 30 + Math.random()*60, th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
+    pos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1] = Math.abs(r*Math.cos(ph))*0.6 + 2;
+    pos[i*3+2] = r*Math.sin(ph)*Math.sin(th) - 10;
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const m = new THREE.PointsMaterial({ color:0x9aa0ad, size:0.06, sizeAttenuation:true, transparent:true, opacity:0.7, depthWrite:false });
+  scene.add(new THREE.Points(g, m));
+})();
+
+/* ============================================================= *
+ *  LOADERS
+ * ============================================================= */
+const draco = new DRACOLoader(); draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+const gltf = new GLTFLoader(); gltf.setDRACOLoader(draco);
+
+function fitModel(obj, targetSize, fixedScale){
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  obj.position.sub(center);                          // center at origin
+  const dim = Math.max(size.x, size.y, size.z) || 1; // normalize by largest dimension so long bugs don't dominate
+  const s = fixedScale != null ? fixedScale : (targetSize / dim);
+  const wrap = new THREE.Group(); wrap.add(obj); wrap.scale.setScalar(s);
+  return { wrap, size, center };
+}
+function enableShadows(obj){
+  obj.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+}
+// recolor any model to a polished black-and-silver mechanical look (keeps surface detail)
+function blackMetal(){ return new THREE.MeshStandardMaterial({ color:0x16181d, metalness:1.0, roughness:0.3,  envMapIntensity:1.6 }); }
+function silverMetal(){ return new THREE.MeshStandardMaterial({ color:0xaeb4bd, metalness:1.0, roughness:0.24, envMapIntensity:1.8 }); }
+function recolor(obj){
+  let i = 0;
+  obj.traverse(o=>{ if(o.isMesh){
+    const src = Array.isArray(o.material) ? o.material[0] : o.material;
+    const m = (i % 2 === 1) ? silverMetal() : blackMetal();   // alternate → black body, silver mechanical accents
+    if(src){ if(src.normalMap) m.normalMap=src.normalMap; if(src.roughnessMap) m.roughnessMap=src.roughnessMap;
+             if(src.aoMap) m.aoMap=src.aoMap; if(src.flatShading) m.flatShading=true; }
+    o.material = m; i++;
+  }});
+}
+// sit a centered+scaled object on the floor (its lowest point touches GROUND_Y)
+function dropToFloor(rootGroup, inner){
+  rootGroup.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(inner);
+  return rootGroup.position.y + (GROUND_Y - bb.min.y);
+}
+
+/* ── PROCEDURAL RAPTORIAL CLAWS ──
+   The downloaded mantis is one fused mesh (no bones), so we attach two articulated
+   claws sized to the model and aim each one at the cursor independently:
+   the LEFT claw reaches when the cursor is on the left, the RIGHT claw when it's right. */
+const M_BLACK = blackMetal(), M_SILVER = silverMetal();
+function clawSeg(len, rA, rB, mat){
+  const g = new THREE.Group();
+  const geo = new THREE.CylinderGeometry(rB, rA, len, 16); geo.translate(0,len/2,0); geo.rotateZ(-Math.PI/2);
+  const m = new THREE.Mesh(geo, mat); m.castShadow=true; g.add(m);
+  const j = new THREE.Mesh(new THREE.SphereGeometry(rA*1.12,12,10), M_SILVER); j.castShadow=true; g.add(j);
+  return g;
+}
+function buildOneClaw(side, L1, L2, rad){
+  const shoulder = new THREE.Group();
+  const upper = clawSeg(L1, rad, rad*0.8, M_BLACK); shoulder.add(upper);
+  const elbow = new THREE.Group(); elbow.position.set(L1,0,0); upper.add(elbow);
+  const lower = clawSeg(L2, rad*0.85, rad*0.45, M_BLACK); elbow.add(lower);
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(L2*0.9, rad*1.5, rad*0.5), M_BLACK);
+  blade.position.set(L2*0.48, rad*0.35, 0); blade.castShadow=true; lower.add(blade);
+  for(let i=1;i<=6;i++){ const sp=new THREE.Mesh(new THREE.ConeGeometry(rad*0.26, rad*1.1, 5), M_SILVER);
+    sp.position.set(i*(L2*0.13), -rad*0.7, 0); sp.rotation.z=Math.PI; sp.castShadow=true; lower.add(sp); }
+  const hook = new THREE.Mesh(new THREE.ConeGeometry(rad*0.6, rad*2.2, 6), M_SILVER);
+  hook.position.set(L2, -rad*0.5, 0); hook.rotation.z = Math.PI*0.85; hook.castShadow=true; lower.add(hook);
+  return { shoulder, upper, elbow, side, L1, L2, rest:new THREE.Vector3() };
+}
+let clawRig=null, clawL=null, clawR=null;
+function buildClawRig(bb){
+  if(clawRig) scene.remove(clawRig);
+  clawRig = new THREE.Group(); scene.add(clawRig);
+  const size = bb.getSize(new THREE.Vector3());
+  const L1 = size.y*0.34, L2 = size.y*0.42, rad = Math.max(size.y*0.05, 0.05);
+  const shY = bb.min.y + size.y*0.62, shZ = bb.max.z - size.z*0.18, shX = size.x*0.20;
+  clawL = buildOneClaw(-1, L1, L2, rad); clawL.shoulder.position.set(-shX, shY, shZ); clawRig.add(clawL.shoulder);
+  clawR = buildOneClaw( 1, L1, L2, rad); clawR.shoulder.position.set( shX, shY, shZ); clawRig.add(clawR.shoulder);
+  // relaxed pose: reaching forward + slightly down on each side
+  clawL.rest.set(-shX - L1*0.5, shY - L1*0.4, shZ + (L1+L2)*0.7);
+  clawR.rest.set( shX + L1*0.5, shY - L1*0.4, shZ + (L1+L2)*0.7);
+}
+// aim a claw's forward (+X) at `target`, fold the elbow by distance
+const _cv=new THREE.Vector3(),_cx=new THREE.Vector3(),_cy=new THREE.Vector3(),_cz=new THREE.Vector3(),_cup=new THREE.Vector3(0,1,0),_cm=new THREE.Matrix4(),_cq=new THREE.Quaternion(),_cpq=new THREE.Quaternion();
+function aimArm2(claw, target, dt){
+  const sh = claw.shoulder; sh.updateWorldMatrix(true,false);
+  const sw = _cv.setFromMatrixPosition(sh.matrixWorld);
+  _cx.copy(target).sub(sw); const dist=_cx.length(); _cx.normalize();
+  _cz.crossVectors(_cx,_cup); if(_cz.lengthSq()<1e-4)_cz.set(0,0,1); _cz.normalize();
+  _cy.crossVectors(_cz,_cx).normalize();
+  _cm.makeBasis(_cx,_cy,_cz); _cq.setFromRotationMatrix(_cm);
+  if(sh.parent){ sh.parent.getWorldQuaternion(_cpq); _cq.premultiply(_cpq.invert()); } // → shoulder-local
+  sh.quaternion.slerp(_cq, 1-Math.pow(0.0025,dt));
+  const reach=claw.L1+claw.L2, tt=THREE.MathUtils.clamp(dist/reach,0,1);
+  const fold=THREE.MathUtils.lerp(-1.9,-0.25,tt);
+  claw.elbow.rotation.z += (fold - claw.elbow.rotation.z)*(1-Math.pow(0.002,dt));
+}
+// active claw strikes toward the cursor; inactive eases back to its still hunting pose
+function driveProcClaw(claw, active, dt){
+  if(active){ aimArm2(claw, aimTarget, dt); }
+  else {
+    const k = 1 - Math.pow(0.004, dt);
+    claw.shoulder.quaternion.slerp(claw.homeQ, k);
+    claw.elbow.rotation.z += (claw.homeElbow - claw.elbow.rotation.z) * k;
+  }
+}
+
+// a tapered cylinder spanning two points (radii match at shared points ⇒ seamless chains)
+function taperBetween(a, b, rA, rB, mat){
+  const dir = new THREE.Vector3().subVectors(b, a), len = dir.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rB, rA, len, 16), mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+  return m;
+}
+
+/* ── HIGH-QUALITY PROCEDURAL MANTIS (black & silver) ──
+   Built when PROCEDURAL is on. Two raptorial claws: the cursor-side one strikes
+   toward the cursor; the other holds dead-still in its raised hunting pose. */
+function buildProceduralMantis(){
+  const pm = new THREE.Group();
+  const BLK = blackMetal(), SIL = silverMetal();
+  const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+  const shadow=o=>o.traverse(c=>{ if(c.isMesh){c.castShadow=true;c.receiveShadow=true;} });
+
+  // abdomen — upswept, smoothly tapered (cone segments share radii ⇒ no gaps)
+  const abdPts=[V(0,0.45,-0.25),V(0,0.74,-1.25),V(0,1.16,-2.3),V(0,1.55,-3.25),V(0,1.7,-4.0)];
+  const abdRad=[0.42,0.44,0.34,0.18,0.04];
+  const abdCurve=new THREE.CatmullRomCurve3(abdPts);
+  const sp=abdCurve.getSpacedPoints(abdRad.length-1);
+  for(let i=0;i<abdRad.length-1;i++){ const s=taperBetween(sp[i],sp[i+1],abdRad[i],abdRad[i+1],BLK); shadow(s); pm.add(s); }
+  for(let i=1;i<abdRad.length-1;i++){ const r=new THREE.Mesh(new THREE.TorusGeometry(abdRad[i]*1.03,0.022,8,20),SIL);
+    r.position.copy(sp[i]); r.quaternion.setFromUnitVectors(V(0,0,1), abdCurve.getTangent(i/(abdRad.length-1))); pm.add(r); }
+
+  // thorax + prothorax "neck" + collar
+  const thorax=new THREE.Mesh(new THREE.CapsuleGeometry(0.34,0.7,10,20),BLK); thorax.rotation.x=Math.PI/2; thorax.position.set(0,0.5,0.05); pm.add(thorax);
+  const neck=taperBetween(V(0,0.62,0.22),V(0,1.05,0.82),0.17,0.12,BLK); pm.add(neck);
+  const collar=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.028,8,24),SIL); collar.position.set(0,0.6,0.22); collar.rotation.x=Math.PI/2; pm.add(collar);
+
+  // head — triangular, faces +Z, big metallic eyes + antennae
+  const head=new THREE.Group(); head.position.set(0,1.18,0.98); pm.add(head);
+  const skull=new THREE.Mesh(new THREE.IcosahedronGeometry(0.3,0),BLK); skull.scale.set(1.55,0.85,0.72); head.add(skull);
+  const chin=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.36,4),BLK); chin.rotation.x=Math.PI/2; chin.rotation.z=Math.PI/4; chin.position.set(0,-0.05,0.2); head.add(chin);
+  for(const sx of [1,-1]){
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(0.1,18,16),SIL); eye.scale.set(0.85,1.3,1); eye.position.set(0.26*sx,0.06,0.1); head.add(eye);
+    const ac=new THREE.CatmullRomCurve3([V(0.09*sx,0.16,0.16),V(0.24*sx,0.55,0.48),V(0.4*sx,0.9,0.72),V(0.52*sx,1.0,1.0)]);
+    head.add(new THREE.Mesh(new THREE.TubeGeometry(ac,20,0.012,6,false),SIL));
+  }
+  shadow(head); shadow(thorax); shadow(neck);
+
+  // four walking legs, planted
+  function leg(side,z,outAng){
+    const hip=new THREE.Group(); hip.position.set(0.3*side,0.46,z);
+    const femur=clawSeg(1.05,0.07,0.05,BLK); hip.add(femur);
+    const knee=new THREE.Group(); knee.position.set(1.05,0,0); femur.add(knee);
+    const tibia=clawSeg(1.5,0.05,0.022,BLK); knee.add(tibia);
+    const foot=new THREE.Mesh(new THREE.SphereGeometry(0.045,8,6),SIL); foot.position.set(1.5,0,0); knee.add(foot);
+    hip.rotation.y = side>0 ? -outAng : Math.PI+outAng; hip.rotation.z=0.5; knee.rotation.z=-2.45;
+    shadow(hip); return hip;
+  }
+  pm.add(leg(1,-0.1,0.55)); pm.add(leg(-1,-0.1,0.55));
+  pm.add(leg(1,-0.95,-0.25)); pm.add(leg(-1,-0.95,-0.25));
+
+  // raptorial forelegs (the tracking claws)
+  function raptor(side){
+    const shoulder=new THREE.Group(); shoulder.position.set(0.3*side,0.92,0.66);
+    shoulder.add(new THREE.Mesh(new THREE.SphereGeometry(0.12,12,10),SIL));
+    const L1=0.95,L2=1.2,rad=0.12;
+    const upper=clawSeg(L1,rad,rad*0.8,BLK); shoulder.add(upper);
+    const elbow=new THREE.Group(); elbow.position.set(L1,0,0); upper.add(elbow);
+    elbow.add(new THREE.Mesh(new THREE.SphereGeometry(0.09,12,10),SIL));
+    const lower=clawSeg(L2,rad*0.8,rad*0.4,BLK); elbow.add(lower);
+    for(let i=1;i<=7;i++){ const t=new THREE.Mesh(new THREE.ConeGeometry(rad*0.22,rad*1.0,5),SIL);
+      t.position.set(i*(L2*0.12),-rad*0.7,0); t.rotation.z=Math.PI; lower.add(t); }
+    const tip=new THREE.Mesh(new THREE.ConeGeometry(rad*0.5,rad*1.7,6),SIL); tip.position.set(L2,-rad*0.4,0); tip.rotation.z=Math.PI*0.8; lower.add(tip);
+    // raised hunting pose (femur up & angled in, blade folded back)
+    shoulder.rotation.set(0, side>0?-0.55:0.55, 1.2); elbow.rotation.z=-2.5;
+    shadow(shoulder); pm.add(shoulder);
+    return { shoulder, upper, elbow, side, L1, L2, homeQ:shoulder.quaternion.clone(), homeElbow:-2.5 };
+  }
+  clawL=raptor(-1); clawR=raptor(1);
+
+  const { wrap } = fitModel(pm, MANTIS.targetHeight);
+  mantis.add(wrap);
+  mantisBaseY = dropToFloor(mantisRoot, mantis); mantisRoot.position.y = mantisBaseY;
+}
+function logGraph(root, title){
+  const meshes=[], bones=[];
+  root.traverse(o=>{
+    if(o.isBone) bones.push(o.name || '(unnamed bone)');
+    else if(o.isMesh){
+      o.geometry.computeBoundingBox(); const bb=o.geometry.boundingBox, s=bb.getSize(new THREE.Vector3());
+      meshes.push(`${o.name||'(mesh)'}${o.isSkinnedMesh?' [skinned]':''} verts=${o.geometry.attributes.position.count} `
+        +`size(${s.x.toFixed(2)},${s.y.toFixed(2)},${s.z.toFixed(2)})`);
+    }
+  });
+  console.log(`[inspect] ${title}\nMESHES:\n  ${meshes.join('\n  ')}\nBONES (${bones.length}):\n  ${bones.join('\n  ') || '(none — model is not rigged)'}`);
+  window.__nodes = window.__nodes || {}; window.__nodes[title] = root;
+}
+
+const missing = [];
+function flagMissing(label){ missing.push(label); updateNotice(); }
+function updateNotice(){
+  const n = document.getElementById('notice');
+  if(!missing.length){ n.classList.remove('show'); return; }
+  n.classList.add('show');
+  n.innerHTML = `Drop your model files into <code>${MODELS_DIR}</code> &nbsp;·&nbsp; missing: <code>${missing.join(', ')}</code> &nbsp;·&nbsp; serve over http (not file://) to load them`;
+}
+
+/* ============================================================= *
+ *  MANTIS
+ * ============================================================= */
+const mantisRoot = new THREE.Group();    // holds the whole rig; we lean this as a fallback
+mantisRoot.position.y = -0.2;
+let mantisBaseY = -0.2;
+scene.add(mantisRoot);
+const mantis = new THREE.Group();        // model goes here, oriented by config
+mantis.rotation.set(...MANTIS.rotation);
+mantisRoot.add(mantis);
+
+const claws = { left:[], right:[] };     // {node, rest:Quaternion}
+
+function placeholderMantis(){
+  // low-key faceted dark stand-in so the scene isn't empty until the real model arrives
+  const mat = new THREE.MeshStandardMaterial({ color:0x15171c, metalness:0.6, roughness:0.5, flatShading:true });
+  const g = new THREE.Group();
+  const bodyShape = new THREE.Mesh(new THREE.CapsuleGeometry(0.5,2.2,6,12), mat); bodyShape.rotation.z=Math.PI/2.2; g.add(bodyShape);
+  const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45,0), mat); head.position.set(1.4,1.0,0); g.add(head);
+  g.traverse(o=>{ if(o.isMesh){o.castShadow=true;o.receiveShadow=true;} });
+  g.scale.setScalar(1.1); g.userData.placeholder=true;
+  mantis.add(g);
+}
+
+function captureClaws(root){
+  const find = names => names.map(nm => root.getObjectByName(nm)).filter(Boolean);
+  find(MANTIS.clawLeft).forEach(n => claws.left.push({ node:n, rest:n.quaternion.clone() }));
+  find(MANTIS.clawRight).forEach(n => claws.right.push({ node:n, rest:n.quaternion.clone() }));
+}
+
+let mantisMixer = null;
+if(PROCEDURAL){
+  buildProceduralMantis();
+} else {
+  gltf.load(MODELS_DIR + MANTIS.file, g => {
+    const model = g.scene;
+    if(INSPECT) logGraph(model, 'mantis');
+    if(RECOLOR) recolor(model);
+    enableShadows(model);
+    const { wrap } = fitModel(model, MANTIS.targetHeight, MANTIS.scale);
+    wrap.position.set(...MANTIS.offset);
+    mantis.add(wrap);
+    captureClaws(model);
+    mantisBaseY = dropToFloor(mantisRoot, mantis); mantisRoot.position.y = mantisBaseY;
+    if(g.animations && g.animations.length){
+      mantisMixer = new THREE.AnimationMixer(model);
+      g.animations.forEach(c => mantisMixer.clipAction(c).play());
+    }
+  }, undefined, () => { placeholderMantis(); mantisBaseY = dropToFloor(mantisRoot, mantis); mantisRoot.position.y = mantisBaseY; flagMissing(MANTIS.file); });
+}
+
+/* ============================================================= *
+ *  NAV CREATURES (bug models)
+ * ============================================================= */
+const navNodes = [];
+const labelLayer = document.getElementById('labels');
+
+function placeholderBug(){
+  const mat = new THREE.MeshStandardMaterial({ color:0x15171c, metalness:0.6, roughness:0.5, flatShading:true });
+  const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.32,0), mat);
+  m.castShadow=true; return m;
+}
+
+SECTIONS.forEach((sec, i) => {
+  const anchor = new THREE.Group();
+  // 4 creatures down each side, staircased and receding back — well clear of the central mantis
+  const sideSign = (i % 2 === 0) ? -1 : 1;
+  const tier = Math.floor(i / 2);                       // 0..3
+  anchor.userData.base = new THREE.Vector3(
+    sideSign * (5.4 + (tier % 2) * 1.6),                // far left / right
+    3.6 - tier * 1.55,                                   // staircase down
+    -1.2 - tier * 1.25                                   // recede into the scene
+  );
+  anchor.position.copy(anchor.userData.base);
+  anchor.userData.phase = i*1.3;
+  anchor.userData.section = sec.id;
+  scene.add(anchor);
+
+  const holder = new THREE.Group(); anchor.add(holder); anchor.userData.holder = holder;
+  gltf.load(MODELS_DIR + sec.file, g => {
+    if(INSPECT) logGraph(g.scene, sec.file);
+    if(RECOLOR) recolor(g.scene);
+    enableShadows(g.scene);
+    const { wrap } = fitModel(g.scene, 1.2);
+    holder.add(wrap);
+  }, undefined, () => { holder.add(placeholderBug()); flagMissing(sec.file); });
+
+  const el = document.createElement('div');
+  el.className = 'nlabel';
+  el.innerHTML = `<span class="ring"><i></i></span><span class="tag">${sec.tag}</span>`;
+  el.addEventListener('click', () => openSection(sec.id));
+  labelLayer.appendChild(el);
+
+  navNodes.push({ sec, anchor, el });
+});
+
+/* ============================================================= *
+ *  CURSOR AIM  (independent, by-side)
+ * ============================================================= */
+const pointer = new THREE.Vector2(0, 0);
+const aimTarget = new THREE.Vector3(0, 1.6, 4.5);
+const aimPlane = new THREE.Plane(new THREE.Vector3(0,0,1), -4.5);
+const ray = new THREE.Raycaster();
+let lastMove = 0;
+
+function onMove(cx, cy){
+  pointer.x = (cx/innerWidth)*2 - 1;
+  pointer.y = -(cy/innerHeight)*2 + 1;
+  ray.setFromCamera(pointer, camera);
+  const hit = new THREE.Vector3();
+  if(ray.ray.intersectPlane(aimPlane, hit)) aimTarget.copy(hit);
+  lastMove = performance.now();
+}
+addEventListener('pointermove', e => onMove(e.clientX, e.clientY));
+
+const clickRay = new THREE.Raycaster();
+addEventListener('pointerdown', e => {
+  if(document.getElementById('overlay').classList.contains('open')) return;
+  clickRay.setFromCamera(new THREE.Vector2((e.clientX/innerWidth)*2-1, -(e.clientY/innerHeight)*2+1), camera);
+  for(const n of navNodes){
+    if(clickRay.intersectObject(n.anchor, true).length){ openSection(n.sec.id); break; }
+  }
+});
+
+// aim a claw node so its configured local axis points toward `target`, blended by `weight`
+const _axisMap = { x:new THREE.Vector3(1,0,0), y:new THREE.Vector3(0,1,0), z:new THREE.Vector3(0,0,1) };
+const _tv = new THREE.Vector3(), _pv = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
+function aimClaw(entry, target, weight, dt){
+  const node = entry.node;
+  const axisKey = MANTIS.clawAimAxis.replace('-','');
+  const sign = MANTIS.clawAimAxis.startsWith('-') ? -1 : 1;
+  const localAxis = _axisMap[axisKey].clone().multiplyScalar(sign);
+  // direction to target in the node's parent space
+  node.parent.updateWorldMatrix(true, false);
+  const toParent = new THREE.Matrix4().copy(node.parent.matrixWorld).invert();
+  _tv.copy(target).applyMatrix4(toParent).sub(node.position).normalize();
+  // rotation that maps the node's outward axis onto that direction
+  _q.setFromUnitVectors(localAxis, _tv);
+  // blend rest → aim by weight, then ease toward it
+  _q2.copy(entry.rest).slerp(_q, THREE.MathUtils.clamp(weight,0,1));
+  node.quaternion.slerp(_q2, 1 - Math.pow(0.002, dt));
+}
+
+/* ============================================================= *
+ *  LOOP
+ * ============================================================= */
+const clock = new THREE.Clock();
+const proj = new THREE.Vector3();
+let frames = 0, fpsT = 0;
+const _t2 = new THREE.Vector3();
+const _t3 = new THREE.Vector3();
+
+function frame(){
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  const idle = performance.now() - lastMove > 2800;
+  if(mantisMixer) mantisMixer.update(dt);
+
+  if(idle){
+    aimTarget.x += (Math.sin(t*0.5)*2.0 - aimTarget.x)*0.02;
+    aimTarget.y += (1.7 + Math.sin(t*0.8)*0.6 - aimTarget.y)*0.02;
+    aimTarget.z += (4.5 - aimTarget.z)*0.02;
+  }
+
+  // gentle breathing
+  mantisRoot.position.y = mantisBaseY + Math.sin(t*0.8)*0.04;
+
+  // subtle camera parallax toward the cursor
+  camera.position.x += (camBase.x + pointer.x*0.7 - camera.position.x)*0.04;
+  camera.position.y += (camBase.y - pointer.y*0.35 - camera.position.y)*0.04;
+  camera.lookAt(0, 0.4, 0);
+
+  // cursor side: -1 (full left) … +1 (full right)
+  const side = THREE.MathUtils.clamp(pointer.x*1.6, -1, 1);
+  const hasBones = claws.left.length || claws.right.length;
+
+  if(hasBones){
+    // RIGGED model: only the cursor-side claw tracks; the other stays dead-still in its hunting (rest) pose
+    const lw = side < -0.02 ? THREE.MathUtils.clamp(-side*1.4, 0, 1) : 0;
+    const rw = side >  0.02 ? THREE.MathUtils.clamp( side*1.4, 0, 1) : 0;
+    claws.left.forEach(c  => aimClaw(c, aimTarget, lw, dt));
+    claws.right.forEach(c => aimClaw(c, aimTarget, rw, dt));
+    // body barely drifts so the claws read as doing the work
+    mantis.rotation.y += ((MANTIS.rotation[1] + pointer.x*0.08) - mantis.rotation.y)*0.05;
+  } else if(clawL && clawR){
+    // procedural mantis: cursor-side claw strikes toward the cursor; the other holds its hunting pose
+    driveProcClaw(clawL, side < -0.05, dt);
+    driveProcClaw(clawR, side >  0.05, dt);
+    mantis.rotation.y += ((MANTIS.rotation[1] + pointer.x*0.1) - mantis.rotation.y)*0.05;
+  } else {
+    // no claws yet (fused model): the whole mantis turns to track the cursor
+    mantis.rotation.y += ((MANTIS.rotation[1] + pointer.x*0.5) - mantis.rotation.y)*0.06;
+    mantis.rotation.x += ((-pointer.y*0.18) - mantis.rotation.x)*0.06;
+  }
+
+  // nav creatures: drift, slow spin, project labels
+  for(const n of navNodes){
+    const ph = n.anchor.userData.phase, b = n.anchor.userData.base;
+    n.anchor.position.set(
+      b.x + Math.sin(t*0.45+ph)*0.28,
+      b.y + Math.sin(t*0.7+ph)*0.34,
+      b.z + Math.cos(t*0.4+ph)*0.28
+    );
+    if(n.anchor.userData.holder){
+      n.anchor.userData.holder.rotation.y = t*0.3 + ph;
+      n.anchor.userData.holder.rotation.z = Math.sin(t*1.2+ph)*0.1;
+    }
+    proj.copy(n.anchor.position).project(camera);
+    if(proj.z < 1){
+      n.el.style.display='flex';
+      n.el.style.left = (proj.x*0.5+0.5)*innerWidth + 'px';
+      n.el.style.top  = (-proj.y*0.5+0.5)*innerHeight + 'px';
+      n.el.style.opacity = THREE.MathUtils.clamp(1.2 - proj.z*1.4, 0.2, 1);
+    } else n.el.style.display='none';
+  }
+
+  renderer.render(scene, camera);
+
+  frames++; fpsT += dt;
+  if(fpsT > 0.5){ document.getElementById('fpsout').textContent = Math.round(frames/fpsT)+' fps'; frames=0; fpsT=0; }
+  requestAnimationFrame(frame);
+}
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ============================================================= *
+ *  SECTION CONTENT
+ * ============================================================= */
+const CONTENT = {
+  services: `
+    <div class="dlabel">What We Build</div>
+    <h2 class="stitle">End-to-end automation for <em>real operations.</em></h2>
+    <p class="sdesc">Every system is engineered around how your business actually works — not how a generic tool thinks it should.</p>
+    <div class="grid3">
+      ${[
+        ['001','Email & Communication Automation','Intelligent sequences, automated follow-ups, and multi-channel pipelines that deliver the right message at the right time — without anyone pressing send.','Gmail · Outlook · Slack'],
+        ['002','Document Processing & OCR','Automated intake, parsing, and routing. Extract data from PDFs, validate against business rules, push to your systems.','PDF · OCR · Parsing'],
+        ['003','Workflow Orchestration','Multi-step processes connected across tools. One action completes, the next fires — with error handling and alerts built in.','Zapier · Make · Custom'],
+        ['004','CRM & Data Integration','Connect CRM, spreadsheets, databases into a single source of truth. Bi-directional sync and enrichment.','Salesforce · HubSpot · Airtable'],
+        ['005','Custom Dashboards & Reporting','Live operational dashboards pulling from every system. Know what’s happening without opening ten tabs.','Analytics · KPIs · Real-time'],
+        ['006','AI-Powered Qualification','Intelligent lead scoring, document verification, and data extraction. Automates the judgment calls humans used to make.','AI · ML · NLP'],
+      ].map(([n,h,p,tag])=>`<div class="card"><div class="num">${n}</div><h3>${h}</h3><p>${p}</p><span class="tag">${tag}</span></div>`).join('')}
+    </div>`,
+  process: `__EVOLUTION__`,
+  features: `
+    <div class="dlabel">The Platform</div>
+    <h2 class="stitle">Built for operators who refuse to <em>do things manually.</em></h2>
+    <p class="sdesc">Every system includes a control center to monitor, adjust, and scale — no code required.</p>
+    <div class="fpanel">
+      <div class="fvis">
+        <div style="width:100%;max-width:320px;border:1px solid var(--line);background:rgba(0,0,0,.4);padding:18px">
+          <div style="font-size:11px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line2)">System Dashboard — Live</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            ${[['Tasks/Day','1,284','+18%'],['Error Rate','0.3%','−92%'],['Avg Time','1.2s','−74%'],['Uptime','99.9%','SLA MET']]
+              .map(([l,v,d])=>`<div style="padding:12px;border:1px solid var(--line2)"><div style="font-size:10px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase">${l}</div><div style="font-size:22px;color:var(--text);margin-top:3px">${v}</div><div style="font-size:11px;color:var(--soft);margin-top:2px">${d}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="ftxt"><div class="dlabel">Real-Time Analytics</div><h3>Know exactly what your automation is doing — and saving.</h3>
+        <p>Every task, workflow, and error is logged and visualized. Track ROI in real time, spot issues before they become problems.</p>
+        <ul class="flist"><li>Live throughput and error monitoring</li><li>Cost savings calculated automatically</li><li>Custom alerts for anomalies</li><li>Executive-ready reports on demand</li></ul></div>
+    </div>
+    <div class="fpanel">
+      <div class="ftxt"><div class="dlabel">Workflow Engine</div><h3>Multi-step processes that run flawlessly.</h3>
+        <p>Chain actions across any system. Email → document parsed → data validated → CRM updated → client notified.</p>
+        <ul class="flist"><li>Visual workflow builder</li><li>Conditional branching and loops</li><li>Automatic retry on failures</li><li>Audit trail for every execution</li></ul></div>
+      <div class="fvis">
+        <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px">
+          ${[['Email received from client','triggered'],['Document parsed & validated','2.1s'],['Data pushed to CRM','0.8s'],['Confirmation sent to client','complete']]
+            .map(([a,b])=>`<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line2)"><span style="width:4px;height:4px;background:var(--soft)"></span><span style="font-size:14px;color:var(--soft)">${a}</span><span style="font-size:12px;color:var(--dim);margin-left:auto">${b}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="fpanel">
+      <div class="fvis"><div style="text-align:center"><div style="font-size:48px;color:var(--text)">200+</div><div style="font-size:12px;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-top:8px">Integrations Available</div></div></div>
+      <div class="ftxt"><div class="dlabel">Integration Hub</div><h3>Connects to every tool your team uses.</h3>
+        <p>Gmail, Salesforce, HubSpot, Slack, QuickBooks, Sheets, Airtable — if it has an API, we connect it.</p>
+        <ul class="flist"><li>Pre-built connectors for 200+ tools</li><li>Custom API integrations</li><li>Bi-directional data sync</li><li>Webhook and event-driven triggers</li></ul></div>
+    </div>`,
+  cases: `
+    <div class="dlabel">Results</div>
+    <h2 class="stitle">What automation looks like when it’s <em>done right.</em></h2>
+    <p class="sdesc">Real systems, real numbers — built around how each operation actually runs.</p>
+    <div class="grid3">
+      ${[
+        ['Healthcare · Operations','Automated patient intake, insurance verification, and appointment routing','Replaced a 12-step manual intake process with a single automated pipeline — forms to verification to scheduling — processing 3,200+ patients in month one with zero missed verifications.',['85%','Less admin time'],['4×','Faster processing']],
+        ['Professional Services','Lead enrichment and scoring engine from inbound submissions','Every new lead is enriched with company data, scored against custom criteria, and routed to the right rep with a full brief in under 8 seconds. Unqualified leads get auto-responses.',['42%','More conversions'],['0 min','Manual sorting']],
+        ['E-Commerce · Ops','Connected inventory, orders, and fulfillment across three platforms','A real-time sync layer unified Shopify, a 3PL warehouse, and QuickBooks. Overselling dropped to near zero; monthly close went from 5 days to 4 hours.',['99.7%','Order accuracy'],['$180k','Annual savings']],
+      ].map(([tag,h,p,m1,m2])=>`<div class="card"><div class="num">${tag}</div><h3>${h}</h3><p>${p}</p><div class="cardm"><div><strong>${m1[0]}</strong><span>${m1[1]}</span></div><div><strong>${m2[0]}</strong><span>${m2[1]}</span></div></div></div>`).join('')}
+    </div>`,
+  testimonials: `
+    <div class="dlabel">Testimonials</div>
+    <h2 class="stitle">Trusted by operators who <em>value their time.</em></h2>
+    <div class="tgrid">
+      ${[
+        ['We eliminated 30 hours of manual data entry per week. The system runs overnight and by morning everything is processed, validated, and in the right place. The error rate dropped from ~8% to basically zero. Transformational.','JR','James R.','VP Operations, Logistics Firm'],
+        ['ROI was obvious within the first month. What used to take my team all day now runs in the background. It feels like we added three people without hiring anyone — and the dashboard alone was worth it.','SP','Sarah P.','Operations Director, Calgary'],
+        ['They didn’t just automate our processes — they rethought them. The system they built is cleaner and smarter than anything we could have designed ourselves. Onboarding dropped from two weeks to three days.','MK','Michael K.','CEO, SaaS Startup'],
+      ].map(([q,av,nm,rl])=>`<div class="tcard"><blockquote>“${q}”</blockquote><div class="who"><div class="av">${av}</div><div><div class="nm">${nm}</div><div class="rl">${rl}</div></div></div></div>`).join('')}
+    </div>`,
+  pricing: `
+    <div class="dlabel">Pricing</div>
+    <h2 class="stitle">Simple pricing. <em>Serious results.</em></h2>
+    <p class="sdesc">Every engagement starts with a free strategy call. No contracts until you see the plan and projected ROI.</p>
+    <div class="price-grid">
+      <div class="pcard"><div class="tier">Starter</div><div class="amt">$2,500 <span>/ project</span></div><div class="pd">Single automation workflow — designed, built, deployed.</div><ul><li>1 workflow (up to 5 steps)</li><li>2 tool integrations</li><li>30 days support</li><li>Documentation & training</li></ul><a class="pbtn pbtn-o" data-goto="contact">Get Started</a></div>
+      <div class="pcard feat"><div class="tier">Professional</div><div class="amt">$7,500 <span>/ month</span></div><div class="pd">Full buildout with ongoing optimization.</div><ul><li>Unlimited workflows</li><li>All integrations</li><li>Custom dashboard</li><li>Priority support + Slack</li><li>Monthly optimization</li></ul><a class="pbtn pbtn-f" data-goto="contact">Get Started</a></div>
+      <div class="pcard"><div class="tier">Enterprise</div><div class="amt">Custom</div><div class="pd">Complex systems, compliance, multi-department.</div><ul><li>Everything in Professional</li><li>Dedicated engineer</li><li>SLA guarantees</li><li>On-premise option</li><li>Custom compliance</li></ul><a class="pbtn pbtn-o" data-goto="contact">Contact Sales</a></div>
+    </div>`,
+  faq: `
+    <div class="dlabel">FAQ</div>
+    <h2 class="stitle">Common questions.</h2>
+    <p class="sdesc">Can’t find what you need? Reach out — we respond within 24 hours.</p>
+    <div class="faq-list">
+      ${[
+        ['How long does a typical project take?','Most single-workflow projects go live within 1–2 weeks. Full operational buildouts take 4–8 weeks depending on complexity.'],
+        ['Do I need to switch my existing tools?','No. We build around what you already use — Gmail, Salesforce, HubSpot, Sheets, Slack, QuickBooks.'],
+        ['What happens if something breaks?','Every workflow has built-in error handling, retry logic, and monitoring. Priority support responds in hours.'],
+        ['Is my data secure?','Encrypted connections, least-privilege access, no sensitive data stored outside your systems. Enterprise can deploy on-premise.'],
+        ['Can I add more automations later?','Yes — every system is modular. Adding a workflow doesn’t require rebuilding what’s running.'],
+        ['What if I’m not technical?','Most clients aren’t. We handle all technical work and train your team on the dashboard.'],
+      ].map(([q,a])=>`<div class="faq-item"><button class="faq-q">${q}<span class="ic">+</span></button><div class="faq-a"><p>${a}</p></div></div>`).join('')}
+    </div>`,
+  contact: `
+    <div class="dlabel">Get Started</div>
+    <h2 class="stitle">Ready to stop doing things <em>the hard way?</em></h2>
+    <p class="sdesc">Free strategy call. We map your processes, identify wins, and show projected ROI.</p>
+    <form class="cform" id="cform">
+      <div class="crow"><input type="text" placeholder="Full Name" required><input type="email" placeholder="Email" required></div>
+      <input type="text" placeholder="Company">
+      <select required><option value="" disabled selected>What are you automating?</option><option>Email & Communications</option><option>Document Processing</option><option>Workflow Orchestration</option><option>CRM & Data Integration</option><option>Dashboards & Reporting</option><option>AI Qualification</option><option>Other</option></select>
+      <textarea placeholder="Tell us about your current process..."></textarea>
+      <button type="submit" class="csub">Book Strategy Call →</button>
+    </form>
+    <p class="cnote">Free consultation · No commitment · 24hr response</p>`,
+};
+
+const EVO_STAGES = [
+  { no:'Phase 01', t:'Discovery & Audit',  d:'We map every manual process, identify the bottlenecks, and calculate the ROI before a single line is built. The egg — everything starts here.', label:'Egg', svg:'egg' },
+  { no:'Phase 02', t:'Architecture',       d:'A complete blueprint takes shape: data flows, integrations, logic, and error handling. The form begins to segment and grow.', label:'Larva', svg:'larva' },
+  { no:'Phase 03', t:'Build & Test',       d:'Every workflow is built, run against edge cases, and validated with real data inside a protective shell before it ever goes live.', label:'Pupa', svg:'pupa' },
+  { no:'Phase 04', t:'Deploy & Optimize',  d:'The system emerges fully formed — live, monitored, and ready to scale. It keeps evolving as your operation does.', label:'Imago', svg:'imago' },
+];
+const EVO_SVG = {
+  egg:`<svg viewBox="0 0 100 100"><ellipse class="fillsoft" cx="50" cy="56" rx="22" ry="30"/><ellipse cx="50" cy="56" rx="22" ry="30"/><path d="M40 44 q10 8 20 0"/><circle cx="50" cy="62" r="3"/></svg>`,
+  larva:`<svg viewBox="0 0 100 100"><path class="fillsoft" d="M18 58 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 l0 6 q-8 14 -16 0 q-8 14 -16 0 q-8 14 -16 0 q-8 14 -16 0 z"/><path d="M18 58 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0"/><circle cx="80" cy="54" r="2.4"/><line x1="84" y1="48" x2="90" y2="42"/><line x1="84" y1="56" x2="91" y2="54"/></svg>`,
+  pupa:`<svg viewBox="0 0 100 100"><path class="fillsoft" d="M50 22 q20 10 16 38 q-3 22 -16 20 q-13 2 -16 -20 q-4 -28 16 -38 z"/><path d="M50 22 q20 10 16 38 q-3 22 -16 20 q-13 2 -16 -20 q-4 -28 16 -38 z"/><path d="M40 40 q10 6 20 0 M40 54 q10 6 20 0 M42 68 q8 5 16 0"/></svg>`,
+  imago:`<svg viewBox="0 0 100 100"><path class="fillsoft" d="M50 30 q-26 -6 -34 14 q14 8 34 4 q20 4 34 -4 q-8 -20 -34 -14 z"/><path d="M50 30 q-26 -6 -34 14 q14 8 34 4 q20 4 34 -4 q-8 -20 -34 -14 z"/><line x1="50" y1="30" x2="50" y2="74"/><circle cx="50" cy="26" r="5"/><line x1="47" y1="22" x2="42" y2="14"/><line x1="53" y1="22" x2="58" y2="14"/><path d="M50 44 l-10 8 M50 52 l-10 10 M50 60 l-8 10 M50 44 l10 8 M50 52 l10 10 M50 60 l8 10"/></svg>`,
+};
+function evolutionMarkup(){
+  return `
+    <div class="dlabel">How It Works</div>
+    <h2 class="stitle">From first call to fully automated — <em>four stages of evolution.</em></h2>
+    <p class="sdesc">We handle strategy, build, testing, deployment, and optimization. You approve the plan and watch it grow.</p>
+    <div class="evo">
+      <div class="evo-stage">
+        ${EVO_STAGES.map((s,i)=>`<div class="evo-svg" data-stage="${i}">${EVO_SVG[s.svg]}</div>`).join('')}
+        <div class="stagecount" id="evoCount"></div>
+      </div>
+      <div class="evo-info">
+        <div class="evo-dots">${EVO_STAGES.map((s,i)=>`<div class="evo-dot" data-stage="${i}"><i></i></div>`).join('')}</div>
+        <div class="phase-no" id="evoNo"></div>
+        <h3 id="evoTitle"></h3>
+        <p id="evoDesc"></p>
+        <div class="evo-meta">${EVO_STAGES.map((s,i)=>`<button data-stage="${i}">${s.label}</button>`).join('')}</div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================= *
+ *  OVERLAY CONTROL
+ * ============================================================= */
+const overlay = document.getElementById('overlay');
+const ovInner = document.getElementById('ovInner');
+let evoTimer = null;
+
+function openSection(id){
+  let html = CONTENT[id];
+  if(id==='process') html = evolutionMarkup();
+  ovInner.innerHTML = html;
+  overlay.classList.add('open');
+  ovInner.querySelectorAll('.faq-q').forEach(q => q.addEventListener('click', ()=>q.parentElement.classList.toggle('open')));
+  ovInner.querySelectorAll('[data-goto]').forEach(a => a.addEventListener('click', e=>{ e.preventDefault(); openSection(a.dataset.goto); }));
+  const cf = ovInner.querySelector('#cform');
+  if(cf) cf.addEventListener('submit', e=>{ e.preventDefault();
+    cf.innerHTML='<p style="font-size:15px;color:var(--soft);font-style:italic">Received. We’ll respond within 24 hours.</p>'; });
+  if(id==='process') startEvolution();
+  overlay.scrollTop = 0;
+}
+function closeSection(){ overlay.classList.remove('open'); if(evoTimer){ clearInterval(evoTimer); evoTimer=null; } }
+window.__openTest = openSection;
+document.getElementById('ovClose').addEventListener('click', closeSection);
+document.getElementById('ovBack').addEventListener('click', closeSection);
+addEventListener('keydown', e=>{ if(e.key==='Escape') closeSection(); });
+
+function startEvolution(){
+  let i = 0;
+  const svgs=ovInner.querySelectorAll('.evo-svg'), dots=ovInner.querySelectorAll('.evo-dot'), btns=ovInner.querySelectorAll('.evo-meta button');
+  const noEl=ovInner.querySelector('#evoNo'), tEl=ovInner.querySelector('#evoTitle'), dEl=ovInner.querySelector('#evoDesc'), cEl=ovInner.querySelector('#evoCount');
+  function show(n){
+    i=n; const s=EVO_STAGES[n];
+    svgs.forEach((el,k)=>el.classList.toggle('on',k===n));
+    dots.forEach((el,k)=>el.classList.toggle('on',k<=n));
+    btns.forEach((el,k)=>el.classList.toggle('on',k===n));
+    noEl.textContent=s.no; tEl.textContent=s.t; dEl.textContent=s.d;
+    cEl.textContent=`Stage ${n+1} / ${EVO_STAGES.length} — ${s.label}`;
+  }
+  dots.forEach((d,k)=>d.addEventListener('click',()=>{ show(k); restart(); }));
+  btns.forEach((b,k)=>b.addEventListener('click',()=>{ show(k); restart(); }));
+  function restart(){ if(evoTimer) clearInterval(evoTimer); evoTimer=setInterval(()=>show((i+1)%EVO_STAGES.length), 3400); }
+  show(0); restart();
+}
+
+/* ============================================================= *
+ *  METRIC COUNTERS  +  BOOT
+ * ============================================================= */
+function runCounters(){
+  document.querySelectorAll('#metricbar .mv').forEach(el=>{
+    const target=+el.dataset.count, suf=el.dataset.suffix||''; let v=0; const step=target/60;
+    const iv=setInterval(()=>{ v+=step; if(v>=target){ v=target; clearInterval(iv); } el.textContent=Math.round(v).toLocaleString()+suf; },16);
+  });
+}
+function boot(){ document.getElementById('loader').classList.add('gone'); document.body.classList.add('ready'); runCounters(); clock.start(); frame(); }
+requestAnimationFrame(()=>requestAnimationFrame(boot));
+</script>
+</body>
+</html>

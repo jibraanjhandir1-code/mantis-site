@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mantis — Predatory Automation</title>
+<meta name="description" content="Mantis designs intelligent automation systems that hunt down manual work — eliminating errors, reclaiming thousands of hours, and scaling operations without scaling headcount.">
+<meta name="theme-color" content="#08090b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08090b; --bg2:#0c0e12; --panel:rgba(16,18,22,.55); --panelb:rgba(255,255,255,.08);
+  --ink:#eef0f3; --soft:#aab0b8; --mute:#7c828c; --dim:#4d525b;
+  --silver:#c7ccd4; --steel:#5b6470;
+  --disp:'Space Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --maxw:1280px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--disp);background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+ul{list-style:none}
+::selection{background:var(--ink);color:var(--bg)}
+@media(hover:hover){ *{cursor:none} }
+
+/* ── fixed 3D stage ── */
+#stage{position:fixed;inset:0;z-index:0;display:block}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(140% 120% at 50% 30%,transparent 40%,rgba(0,0,0,.5) 82%,rgba(0,0,0,.92) 100%)}
+#grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── custom cursor ── */
+#cur{position:fixed;top:0;left:0;z-index:90;width:26px;height:26px;border:1px solid rgba(255,255,255,.5);
+  border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;transition:width .25s,height .25s,background .25s,border-color .25s;mix-blend-mode:difference}
+#cur.big{width:60px;height:60px;background:rgba(255,255,255,.12);border-color:transparent}
+#curdot{position:fixed;top:0;left:0;z-index:90;width:4px;height:4px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:difference}
+@media(hover:none){#cur,#curdot{display:none}}
+
+/* ── nav ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:40;height:74px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,4vw,52px);transition:background .4s,backdrop-filter .4s}
+.nav.solid{background:rgba(8,9,11,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--panelb)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:600;letter-spacing:.34em;font-size:15px;text-transform:uppercase}
+.brand .gl{width:9px;height:9px;border:1.5px solid var(--silver);transform:rotate(45deg)}
+.nav-links{display:flex;gap:30px;align-items:center}
+.nav-links a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .3s;position:relative}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--ink);transition:width .35s var(--ease)}
+.nav-links a:hover{color:var(--ink)}.nav-links a:hover::after{width:100%}
+.nav-cta{padding:9px 20px;border:1px solid var(--panelb);color:var(--ink)!important;transition:all .3s}
+.nav-cta::after{display:none!important}
+.nav-cta:hover{background:var(--ink);color:var(--bg)!important;border-color:var(--ink)}
+.nav-burger{display:none;flex-direction:column;gap:5px}
+.nav-burger span{width:22px;height:1.5px;background:var(--ink);display:block;transition:.3s}
+
+/* ── section spine (index) ── */
+.spine{position:fixed;right:clamp(14px,2.4vw,30px);top:50%;transform:translateY(-50%);z-index:35;display:flex;flex-direction:column;gap:14px;align-items:flex-end}
+.spine a{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);display:flex;align-items:center;gap:9px;transition:color .3s}
+.spine a .ln{width:14px;height:1px;background:var(--dim);transition:all .35s var(--ease)}
+.spine a.on,.spine a:hover{color:var(--ink)}
+.spine a.on .ln,.spine a:hover .ln{width:34px;background:var(--ink)}
+@media(max-width:900px){.spine{display:none}}
+
+/* progress bar */
+.prog{position:fixed;top:0;left:0;height:2px;background:var(--silver);z-index:50;width:0}
+
+/* ── content shell ── */
+main{position:relative;z-index:10}
+.sec{min-height:100vh;display:flex;align-items:center;padding:120px clamp(20px,5vw,52px) 90px;position:relative}
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto}
+.col{max-width:560px}
+.col.right{margin-left:auto}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.tag::before{content:'';width:24px;height:1px;background:var(--steel)}
+h1.huge{font-size:clamp(48px,9vw,128px);font-weight:600;line-height:.92;letter-spacing:-.03em}
+h2.big{font-size:clamp(30px,4.6vw,60px);font-weight:600;line-height:1.02;letter-spacing:-.02em}
+.lead{font-size:clamp(15px,1.5vw,19px);color:var(--soft);max-width:48ch;margin-top:22px;line-height:1.7}
+.glass{background:var(--panel);border:1px solid var(--panelb);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+
+/* hero */
+#hero{align-items:flex-end;min-height:100vh}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;width:100%;gap:30px;flex-wrap:wrap}
+.hero-meta{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.12em;max-width:280px;line-height:1.8}
+.btns{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:all .3s var(--ease)}
+.btn-f{background:var(--ink);color:var(--bg)}.btn-f:hover{box-shadow:0 0 0 1px var(--ink),0 18px 50px -18px rgba(255,255,255,.4);transform:translateY(-2px)}
+.btn-o{border:1px solid var(--panelb);color:var(--ink)}.btn-o:hover{border-color:var(--silver);transform:translateY(-2px)}
+.scrollcue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:10px}
+.scrollcue .bar{width:1px;height:40px;background:linear-gradient(var(--steel),transparent);animation:drop 2.2s infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--panelb);border:1px solid var(--panelb)}
+.metric{background:var(--bg2);padding:34px 26px}
+.metric .v{font-size:clamp(30px,4vw,52px);font-weight:600;letter-spacing:-.02em}
+.metric .l{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:8px}
+@media(max-width:760px){.metrics{grid-template-columns:repeat(2,1fr)}}
+
+/* cards grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:50px}
+.card{padding:30px;border:1px solid var(--panelb);background:var(--panel);backdrop-filter:blur(10px);transition:transform .5s var(--ease),border-color .4s,background .4s}
+.card:hover{transform:translateY(-6px);border-color:var(--steel);background:rgba(22,25,30,.7)}
+.card .n{font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:.2em;margin-bottom:18px}
+.card h3{font-size:19px;font-weight:600;margin-bottom:10px;line-height:1.25}
+.card p{font-size:14px;color:var(--soft);line-height:1.65}
+.card .k{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.1em;margin-top:18px;display:block}
+.card .m{display:flex;gap:24px;margin-top:18px;padding-top:16px;border-top:1px solid var(--panelb)}
+.card .m b{display:block;font-size:22px;font-weight:600}.card .m s{font-family:var(--mono);font-size:10px;color:var(--mute);text-decoration:none;text-transform:uppercase;letter-spacing:.1em}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+/* process timeline */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:54px;counter-reset:s}
+.step{position:relative;padding:28px 22px;border:1px solid var(--panelb);background:var(--panel);backdrop-filter:blur(10px);transition:transform .5s var(--ease),border-color .4s}
+.step:hover{transform:translateY(-6px);border-color:var(--steel)}
+.step .ph{font-family:var(--mono);font-size:42px;font-weight:700;color:rgba(255,255,255,.07);line-height:1}
+.step h3{font-size:17px;font-weight:600;margin:14px 0 8px}
+.step p{font-size:13px;color:var(--soft);line-height:1.6}
+@media(max-width:900px){.flow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.flow{grid-template-columns:1fr}}
+
+/* feature rows */
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.feat .ft{padding:34px;border:1px solid var(--panelb);background:var(--panel);backdrop-filter:blur(10px)}
+.feat h3{font-size:21px;font-weight:600;margin:8px 0 12px}
+.feat p{font-size:14px;color:var(--soft);line-height:1.7;margin-bottom:16px}
+.feat li{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--soft);margin-bottom:9px}
+.feat li::before{content:'';width:5px;height:5px;background:var(--silver);transform:rotate(45deg);flex-shrink:0}
+@media(max-width:760px){.feat{grid-template-columns:1fr}}
+
+/* pricing */
+.price{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:50px;align-items:start}
+.pc{padding:32px;border:1px solid var(--panelb);background:var(--panel);backdrop-filter:blur(10px);transition:transform .5s var(--ease),border-color .4s}
+.pc:hover{transform:translateY(-6px)}
+.pc.feat2{border-color:var(--silver)}
+.pc.feat2::before{content:'RECOMMENDED';font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--bg);background:var(--silver);padding:3px 10px;display:inline-block;margin-bottom:14px}
+.pc .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.pc .amt{font-size:34px;font-weight:600;margin:12px 0 4px}
+.pc .amt span{font-size:13px;color:var(--mute);font-family:var(--mono)}
+.pc .pd{font-size:13px;color:var(--soft);margin-bottom:18px}
+.pc li{font-size:13px;color:var(--soft);margin-bottom:9px;display:flex;gap:9px;align-items:center}
+.pc li::before{content:'';width:4px;height:4px;background:var(--silver);transform:rotate(45deg);flex-shrink:0}
+.pc .pb{display:block;text-align:center;margin-top:24px;padding:13px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:all .3s}
+.pb-f{background:var(--ink);color:var(--bg)}.pb-o{border:1px solid var(--panelb)}.pb-o:hover{border-color:var(--silver)}
+@media(max-width:900px){.price{grid-template-columns:1fr}}
+
+/* testimonials */
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:50px}
+.tc{padding:30px;border:1px solid var(--panelb);background:var(--panel);backdrop-filter:blur(10px)}
+.tc q{font-size:15px;color:var(--soft);line-height:1.7;display:block;margin-bottom:20px}
+.tc .who{display:flex;align-items:center;gap:12px}
+.tc .av{width:38px;height:38px;border:1px solid var(--panelb);display:grid;place-items:center;font-family:var(--mono);font-size:12px;color:var(--silver)}
+.tc .nm{font-size:14px;font-weight:600}.tc .rl{font-family:var(--mono);font-size:11px;color:var(--mute)}
+@media(max-width:900px){.tg{grid-template-columns:1fr}}
+
+/* faq */
+.faq{margin-top:40px;border-top:1px solid var(--panelb)}
+.qa{border-bottom:1px solid var(--panelb)}
+.q{width:100%;display:flex;justify-content:space-between;gap:16px;align-items:center;padding:22px 4px;text-align:left;font-size:18px;font-weight:500;transition:color .3s}
+.q:hover{color:var(--silver)}
+.q .pl{font-family:var(--mono);color:var(--mute);transition:transform .3s}
+.qa.open .q .pl{transform:rotate(45deg)}
+.a{max-height:0;overflow:hidden;transition:max-height .5s var(--ease)}
+.qa.open .a{max-height:220px}
+.a p{padding:0 4px 24px;font-size:14px;color:var(--soft);line-height:1.7;max-width:70ch}
+
+/* contact */
+.cta-wrap{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+form{display:flex;flex-direction:column;gap:12px;max-width:460px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,select,textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--panelb);padding:14px 16px;font-family:var(--disp);font-size:14px;color:var(--ink);outline:none;transition:border-color .3s}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+input:focus,select:focus,textarea:focus{border-color:var(--silver)}
+select{color:var(--dim);appearance:none}select option{background:#0c0e12;color:var(--ink)}
+textarea{resize:vertical;min-height:96px}
+.submit{background:var(--ink);color:var(--bg);padding:15px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:all .3s}
+.submit:hover{box-shadow:0 18px 50px -18px rgba(255,255,255,.5)}
+@media(max-width:860px){.cta-wrap{grid-template-columns:1fr;gap:30px}}
+
+/* footer */
+footer{position:relative;z-index:10;border-top:1px solid var(--panelb);background:rgba(6,7,9,.7);backdrop-filter:blur(14px);padding:60px clamp(20px,5vw,52px) 40px}
+.fgrid{max-width:var(--maxw);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+.fgrid p{font-size:13px;color:var(--mute);margin-top:12px;max-width:34ch;line-height:1.7}
+.fcol h4{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.fcol a{display:block;font-size:14px;color:var(--soft);margin-bottom:9px;transition:color .3s}.fcol a:hover{color:var(--ink)}
+.fbtm{max-width:var(--maxw);margin:36px auto 0;padding-top:22px;border-top:1px solid var(--panelb);display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--mute);flex-wrap:wrap;gap:10px}
+@media(max-width:760px){.fgrid{grid-template-columns:1fr 1fr}}
+
+/* loader */
+#load{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;transition:opacity .9s ease}
+#load.gone{opacity:0;pointer-events:none}
+#load .b{font-family:var(--mono);font-size:12px;letter-spacing:.4em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:14px}
+#load .b .gl{width:9px;height:9px;border:1.5px solid var(--silver);transform:rotate(45deg);animation:sp 1.5s linear infinite}
+@keyframes sp{to{transform:rotate(405deg)}}
+
+@media(max-width:760px){
+  .nav-links{display:none}.nav-burger{display:flex}
+  .sec{padding:110px 20px 70px}
+}
+</style>
+</head>
+<body>
+
+<div id="load"><div class="b"><span class="gl"></span>Mantis</div></div>
+
+<canvas id="stage"></canvas>
+<div id="scrim"></div>
+<div id="grain"></div>
+<div id="cur"></div><div id="curdot"></div>
+<div class="prog" id="prog"></div>
+
+<nav class="nav" id="nav">
+  <a href="#hero" class="brand"><span class="gl"></span>Mantis</a>
+  <div class="nav-links">
+    <a href="#systems">Systems</a><a href="#process">Process</a><a href="#platform">Platform</a>
+    <a href="#results">Results</a><a href="#pricing">Pricing</a>
+    <a href="#contact" class="nav-cta">Deploy →</a>
+  </div>
+  <button class="nav-burger" id="burger"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="spine" id="spine"></div>
+
+<main>
+  <!-- HERO -->
+  <section class="sec" id="hero" data-spine="Index">
+    <div class="wrap">
+      <div class="tag rv">Intelligent Automation Systems · Est. Calgary</div>
+      <h1 class="huge rv d1">The apex of<br>automation.</h1>
+      <div class="hero-row">
+        <div>
+          <p class="lead rv d2">Mantis builds systems that hunt down manual work — striking with precision, eliminating errors, and reclaiming thousands of hours. Your operation, on instinct.</p>
+          <div class="btns rv d3">
+            <a href="#contact" class="btn btn-f" data-cur>Book a strike call →</a>
+            <a href="#platform" class="btn btn-o" data-cur>See the platform</a>
+          </div>
+        </div>
+        <div class="hero-meta rv d4">[ STATUS ]<br>System online · Accepting clients Q2 2026<br>51.0447° N / 114.0719° W</div>
+      </div>
+    </div>
+    <div class="scrollcue"><span>Scroll</span><span class="bar"></span></div>
+  </section>
+
+  <!-- METRICS -->
+  <section class="sec" id="metrics" data-spine="Impact">
+    <div class="wrap">
+      <div class="tag rv">By the numbers</div>
+      <h2 class="big rv d1" style="margin-bottom:46px">Numbers that don’t blink.</h2>
+      <div class="metrics rv d2">
+        <div class="metric"><div class="v" data-c="2400">0</div><div class="l">Hours saved / mo</div></div>
+        <div class="metric"><div class="v" data-c="97" data-s="%">0</div><div class="l">Error reduction</div></div>
+        <div class="metric"><div class="v" data-c="340" data-s="%">0</div><div class="l">Average ROI</div></div>
+        <div class="metric"><div class="v" data-c="48" data-s="hr">0</div><div class="l">Avg deployment</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYSTEMS -->
+  <section class="sec" id="systems" data-spine="Systems">
+    <div class="wrap">
+      <div class="col">
+        <div class="tag rv">What we build</div>
+        <h2 class="big rv d1">End-to-end automation for real operations.</h2>
+        <p class="lead rv d2">Every system is engineered around how your business actually works — not how a generic tool thinks it should.</p>
+      </div>
+      <div class="grid" id="systemsGrid"></div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="sec" id="process" data-spine="Process">
+    <div class="wrap">
+      <div class="col">
+        <div class="tag rv">How it works</div>
+        <h2 class="big rv d1">First call to fully automated, in four phases.</h2>
+        <p class="lead rv d2">We handle strategy, build, testing, and deployment. You approve the plan and watch it run.</p>
+      </div>
+      <div class="flow" id="flow"></div>
+    </div>
+  </section>
+
+  <!-- PLATFORM -->
+  <section class="sec" id="platform" data-spine="Platform">
+    <div class="wrap">
+      <div class="col right" style="text-align:right">
+        <div class="tag rv" style="justify-content:flex-end">The platform</div>
+        <h2 class="big rv d1">Built for operators who refuse to do it manually.</h2>
+        <p class="lead rv d2" style="margin-left:auto">A control center to monitor, adjust, and scale every system — no code required.</p>
+      </div>
+      <div id="platformRows"></div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="sec" id="results" data-spine="Results">
+    <div class="wrap">
+      <div class="col">
+        <div class="tag rv">Results</div>
+        <h2 class="big rv d1">What it looks like done right.</h2>
+      </div>
+      <div class="grid" id="resultsGrid"></div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="sec" id="voices" data-spine="Voices">
+    <div class="wrap">
+      <div class="col"><div class="tag rv">Field reports</div><h2 class="big rv d1">Trusted by operators who value their time.</h2></div>
+      <div class="tg"></div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="sec" id="pricing" data-spine="Pricing">
+    <div class="wrap">
+      <div class="col"><div class="tag rv">Pricing</div><h2 class="big rv d1">Simple pricing. Serious results.</h2>
+      <p class="lead rv d2">Every engagement starts with a free strategy call. No contracts until you see the plan and the projected ROI.</p></div>
+      <div class="price" id="price"></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec" id="faq" data-spine="FAQ">
+    <div class="wrap">
+      <div class="col"><div class="tag rv">Questions</div><h2 class="big rv d1">Common questions.</h2></div>
+      <div class="faq rv d1"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="sec" id="contact" data-spine="Deploy">
+    <div class="wrap">
+      <div class="cta-wrap">
+        <div>
+          <div class="tag rv">Deploy</div>
+          <h2 class="big rv d1">Stop doing it<br>the hard way.</h2>
+          <p class="lead rv d2">Free strategy call. We map your processes, find the wins, and show projected ROI before you commit to anything.</p>
+        </div>
+        <form class="glass rv d2" id="form" style="padding:30px">
+          <div class="frow"><input type="text" placeholder="Full name" required><input type="email" placeholder="Email" required></div>
+          <input type="text" placeholder="Company">
+          <select required><option value="" disabled selected>What are you automating?</option><option>Email & communications</option><option>Document processing</option><option>Workflow orchestration</option><option>CRM & data integration</option><option>Dashboards & reporting</option><option>AI qualification</option><option>Other</option></select>
+          <textarea placeholder="Tell us about your current process…"></textarea>
+          <button type="submit" class="submit">Book strategy call →</button>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--mute)">Free · No commitment · 24hr response</span>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="fgrid">
+    <div><div class="brand"><span class="gl"></span>Mantis</div><p>Predatory automation systems that hunt down manual work, eliminate errors, and scale operations.</p></div>
+    <div class="fcol"><h4>Systems</h4><a href="#systems">Email automation</a><a href="#systems">Document processing</a><a href="#systems">Workflow orchestration</a><a href="#systems">CRM integration</a></div>
+    <div class="fcol"><h4>Company</h4><a href="#process">How it works</a><a href="#results">Case studies</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
+    <div class="fcol"><h4>Connect</h4><a href="mailto:hello@mantis.io">hello@mantis.io</a><a href="#">LinkedIn</a><a href="#">Twitter / X</a></div>
+  </div>
+  <div class="fbtm"><span>© 2026 Mantis. All rights reserved.</span><span>Predatory Automation. Delivered.™</span></div>
+</footer>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+/* ============ DATA ============ */
+const SERVICES = [
+  ['001','Email & communication','Intelligent sequences, automated follow-ups, and multi-channel pipelines that deliver the right message at the right time — without anyone pressing send.','Gmail · Outlook · Slack'],
+  ['002','Document processing & OCR','Automated intake, parsing, and routing. Extract data from PDFs, validate against business rules, push to your systems.','PDF · OCR · Parsing'],
+  ['003','Workflow orchestration','Multi-step processes connected across tools. One action completes, the next fires — with error handling and alerts built in.','Zapier · Make · Custom'],
+  ['004','CRM & data integration','Connect CRM, spreadsheets, and databases into a single source of truth. Bi-directional sync and enrichment.','Salesforce · HubSpot · Airtable'],
+  ['005','Dashboards & reporting','Live operational dashboards pulling from every system. Know what’s happening without opening ten tabs.','Analytics · KPIs · Real-time'],
+  ['006','AI-powered qualification','Lead scoring, document verification, and data extraction. Automates the judgment calls humans used to make.','AI · ML · NLP'],
+];
+const STEPS = [
+  ['01','Discovery & audit','We map every manual process, find the bottlenecks, and calculate ROI before a line is built.'],
+  ['02','Architecture','A complete blueprint — data flows, integrations, logic, and error handling.'],
+  ['03','Build & test','Every workflow built, run against edge cases, and validated with real data.'],
+  ['04','Deploy & optimize','Go live with monitoring. We iterate on performance as you scale.'],
+];
+const FEATURES = [
+  ['Real-time analytics','Know exactly what your automation is doing — and saving.',['Live throughput & error monitoring','Cost savings calculated automatically','Custom alerts for anomalies','Executive-ready reports on demand']],
+  ['Workflow engine','Multi-step processes that run flawlessly.',['Visual workflow builder','Conditional branching & loops','Automatic retry on failure','Audit trail for every execution']],
+  ['Integration hub','Connects to every tool your team uses.',['200+ pre-built connectors','Custom API integrations','Bi-directional data sync','Webhook & event triggers']],
+];
+const CASES = [
+  ['Healthcare · Ops','Automated patient intake, insurance verification & routing','Replaced a 12-step manual intake with a single pipeline — 3,200+ patients in month one, zero missed verifications.','85%','Less admin','4×','Faster'],
+  ['Professional services','Lead enrichment & scoring from inbound forms','Every lead enriched, scored, and routed with a full brief in under 8 seconds. Unqualified leads auto-handled.','42%','More conv.','0 min','Manual sort'],
+  ['E-commerce · Ops','Inventory, orders & fulfillment across 3 platforms','A real-time sync layer unified Shopify, a 3PL, and QuickBooks. Overselling near zero; close went 5 days → 4 hours.','99.7%','Accuracy','$180k','Saved/yr'],
+];
+const VOICES = [
+  ['We eliminated 30 hours of manual data entry a week. It runs overnight and by morning everything is processed and in the right place. Error rate went from ~8% to basically zero.','JR','James R.','VP Operations, Logistics'],
+  ['ROI was obvious in the first month. What took my team all day now runs in the background. It feels like we added three people without hiring anyone.','SP','Sarah P.','Operations Director, Calgary'],
+  ['They didn’t just automate our process — they rethought it. Cleaner and smarter than anything we’d have designed. Onboarding dropped from two weeks to three days.','MK','Michael K.','CEO, SaaS Startup'],
+];
+const PRICE = [
+  ['Starter','$2,500','/ project','Single automation workflow — designed, built, deployed.',['1 workflow (up to 5 steps)','2 tool integrations','30 days support','Docs & training'],'pb-o','Get started',false],
+  ['Professional','$7,500','/ month','Full buildout with ongoing optimization.',['Unlimited workflows','All integrations','Custom dashboard','Priority support + Slack','Monthly optimization'],'pb-f','Get started',true],
+  ['Enterprise','Custom','','Complex systems, compliance, multi-department.',['Everything in Professional','Dedicated engineer','SLA guarantees','On-premise option','Custom compliance'],'pb-o','Contact sales',false],
+];
+const FAQ = [
+  ['How long does a typical project take?','Most single-workflow projects go live in 1–2 weeks. Full operational buildouts take 4–8 weeks depending on complexity.'],
+  ['Do I need to switch my existing tools?','No. We build around what you already use — Gmail, Salesforce, HubSpot, Sheets, Slack, QuickBooks.'],
+  ['What happens if something breaks?','Every workflow has built-in error handling, retry logic, and monitoring. Priority support responds in hours.'],
+  ['Is my data secure?','Encrypted connections, least-privilege access, and no sensitive data stored outside your systems. Enterprise can deploy on-premise.'],
+  ['Can I add more automations later?','Yes — every system is modular. Adding a workflow doesn’t require rebuilding what’s running.'],
+  ['What if I’m not technical?','Most clients aren’t. We handle all technical work and train your team on the dashboard.'],
+];
+
+/* ============ RENDER CONTENT ============ */
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+document.getElementById('systemsGrid').append(...SERVICES.map(([n,h,p,k],i)=>el(
+  `<div class="card rv ${'d'+((i%3)+1)}"><div class="n">${n}</div><h3>${h}</h3><p>${p}</p><span class="k">${k}</span></div>`)));
+document.getElementById('flow').append(...STEPS.map(([ph,h,p],i)=>el(
+  `<div class="step rv ${'d'+(i+1)}"><div class="ph">${ph}</div><h3>${h}</h3><p>${p}</p></div>`)));
+document.getElementById('platformRows').append(...FEATURES.map(([h,p,li],i)=>el(
+  `<div class="feat rv ${'d'+((i%2)+1)}"><div class="ft"><div class="tag" style="margin-bottom:0">Feature 0${i+1}</div><h3>${h}</h3><p>${p}</p><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div class="ft" style="display:grid;place-items:center"><div style="font-family:var(--mono);text-align:center"><div style="font-size:46px;font-weight:700;color:var(--silver)">${['99.9%','4 steps','200+'][i]}</div><div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-top:8px">${['Uptime SLA','Chained per flow','Integrations'][i]}</div></div></div></div>`)));
+document.getElementById('resultsGrid').append(...CASES.map(([tag,h,p,a,al,b,bl],i)=>el(
+  `<div class="card rv ${'d'+((i%3)+1)}"><div class="n">${tag}</div><h3>${h}</h3><p>${p}</p><div class="m"><div><b>${a}</b><s>${al}</s></div><div><b>${b}</b><s>${bl}</s></div></div></div>`)));
+document.querySelector('.tg').append(...VOICES.map(([q,av,nm,rl],i)=>el(
+  `<div class="tc rv ${'d'+((i%3)+1)}"><q>“${q}”</q><div class="who"><div class="av">${av}</div><div><div class="nm">${nm}</div><div class="rl">${rl}</div></div></div></div>`)));
+document.getElementById('price').append(...PRICE.map(([t,amt,per,pd,li,cls,cta,feat],i)=>el(
+  `<div class="pc rv ${'d'+(i+1)} ${feat?'feat2':''}"><div class="t">${t}</div><div class="amt">${amt} <span>${per}</span></div><div class="pd">${pd}</div><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul><a href="#contact" class="pb ${cls}" data-cur>${cta}</a></div>`)));
+document.querySelector('.faq').append(...FAQ.map(([q,a])=>el(
+  `<div class="qa"><button class="q">${q}<span class="pl">+</span></button><div class="a"><p>${a}</p></div></div>`)));
+document.querySelectorAll('.q').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));
+document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();e.target.innerHTML='<p style="font-family:var(--mono);font-size:13px;color:var(--silver)">✓ Received. We’ll respond within 24 hours.</p>';});
+
+/* spine */
+const secs=[...document.querySelectorAll('.sec')];
+const spine=document.getElementById('spine');
+secs.forEach((s,i)=>{ const a=document.createElement('a'); a.href='#'+s.id;
+  a.innerHTML=`<span>${s.dataset.spine}</span><span class="ln"></span>`; a.dataset.i=i; spine.appendChild(a); });
+const spineLinks=[...spine.children];
+
+/* ============ 3D MANTIS ============ */
+const canvas=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x08090b);
+scene.fog=new THREE.FogExp2(0x08090b,0.03);
+const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.1,200);
+
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+scene.environmentIntensity=0.5;
+
+const hemi=new THREE.HemisphereLight(0xdfe3ea,0x07080a,0.55); scene.add(hemi);
+const key=new THREE.DirectionalLight(0xffffff,2.6); key.position.set(5,10,7);
+key.castShadow=true; key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.0004;
+key.shadow.camera.near=1; key.shadow.camera.far=50; Object.assign(key.shadow.camera,{left:-10,right:10,top:10,bottom:-10}); scene.add(key);
+const fill=new THREE.DirectionalLight(0xc9d2e0,0.5); fill.position.set(-8,3,5); scene.add(fill);
+const rim=new THREE.DirectionalLight(0xffffff,0.8); rim.position.set(-4,5,-8); scene.add(rim);
+
+const floor=new THREE.Mesh(new THREE.CircleGeometry(60,80),
+  new THREE.MeshStandardMaterial({color:0x0a0c10,metalness:0.55,roughness:0.6}));
+floor.rotation.x=-Math.PI/2; floor.position.y=-1.9; floor.receiveShadow=true; scene.add(floor);
+
+// faint stars
+(function(){const N=600,p=new Float32Array(N*3);for(let i=0;i<N;i++){const r=34+Math.random()*60,th=Math.random()*6.28,ph=Math.acos(2*Math.random()-1);p[i*3]=r*Math.sin(ph)*Math.cos(th);p[i*3+1]=Math.abs(r*Math.cos(ph))*.6+2;p[i*3+2]=r*Math.sin(ph)*Math.sin(th)-12;}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x9aa0ad,size:.06,transparent:true,opacity:.6,depthWrite:false})));})();
+
+// drifting dust motes near the mantis (adds living depth + motion)
+let dust=null;
+(function(){const N=260,p=new Float32Array(N*3);for(let i=0;i<N;i++){p[i*3]=(Math.random()-0.5)*16;p[i*3+1]=Math.random()*8-1;p[i*3+2]=(Math.random()-0.5)*16;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  dust=new THREE.Points(g,new THREE.PointsMaterial({color:0xcfd4dc,size:.03,transparent:true,opacity:.45,depthWrite:false}));scene.add(dust);})();
+
+const Q=new URLSearchParams(location.search);
+const FACE_OFFSET = Q.has('my') ? parseFloat(Q.get('my')) : -Math.PI/2; // neutral facing: clean profile, head toward the content
+
+const GROUND=-1.9;
+const mantisRoot=new THREE.Group(); scene.add(mantisRoot);
+const mantis=new THREE.Group(); mantisRoot.add(mantis);
+let baseY=0;
+
+function blackMetal(){return new THREE.MeshStandardMaterial({color:0x14161b,metalness:1,roughness:0.32,envMapIntensity:1.5});}
+function silverMetal(){return new THREE.MeshStandardMaterial({color:0xb4bac2,metalness:1,roughness:0.26,envMapIntensity:1.7});}
+function recolor(o){let i=0;o.traverse(c=>{if(c.isMesh){const s=Array.isArray(c.material)?c.material[0]:c.material;const m=(i%2===1)?silverMetal():blackMetal();if(s){if(s.normalMap)m.normalMap=s.normalMap;if(s.roughnessMap)m.roughnessMap=s.roughnessMap;}c.material=m;c.castShadow=c.receiveShadow=true;i++;}});}
+
+const draco=new DRACOLoader(); draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+const gltf=new GLTFLoader(); gltf.setDRACOLoader(draco);
+gltf.load('models/mantis.glb', g=>{
+  const m=g.scene; recolor(m);
+  const box=new THREE.Box3().setFromObject(m), size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+  m.position.sub(ctr);
+  const s=5.4/(Math.max(size.x,size.y,size.z)||1);
+  const wrap=new THREE.Group(); wrap.add(m); wrap.scale.setScalar(s); mantis.add(wrap);
+  mantisRoot.updateMatrixWorld(true);
+  const bb=new THREE.Box3().setFromObject(mantis); baseY=GROUND-bb.min.y; mantisRoot.position.y=baseY;
+}, undefined, ()=>{ // fallback block so the scene isn't empty
+  const m=new THREE.Mesh(new THREE.IcosahedronGeometry(1.6,0),blackMetal()); m.castShadow=true; mantis.add(m);
+  const bb=new THREE.Box3().setFromObject(mantis); baseY=GROUND-bb.min.y; mantisRoot.position.y=baseY;
+});
+
+/* pointer + scroll state */
+const ptr={x:0,y:0,tx:0,ty:0};
+addEventListener('pointermove',e=>{ ptr.tx=(e.clientX/innerWidth)*2-1; ptr.ty=-(e.clientY/innerHeight)*2+1; });
+let scrollP=0;
+function onScroll(){ const max=document.documentElement.scrollHeight-innerHeight; scrollP=max>0?scrollY/max:0;
+  document.getElementById('prog').style.width=(scrollP*100)+'%';
+  document.getElementById('nav').classList.toggle('solid',scrollY>40);
+}
+addEventListener('scroll',onScroll,{passive:true});
+
+/* spine active + reveal */
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in');
+  if(e.target.classList.contains('sec')){ const i=secs.indexOf(e.target); spineLinks.forEach((l,k)=>l.classList.toggle('on',k===i)); if(i===1) runCounters(); } } });},{threshold:0.18});
+document.querySelectorAll('.rv').forEach(n=>io.observe(n));
+secs.forEach(s=>io.observe(s));
+
+let counted=false;
+function runCounters(){ if(counted)return; counted=true;
+  document.querySelectorAll('.metric .v').forEach(v=>{const t=+v.dataset.c,suf=v.dataset.s||'';let n=0;const st=t/55;const iv=setInterval(()=>{n+=st;if(n>=t){n=t;clearInterval(iv);}v.textContent=Math.round(n).toLocaleString()+suf;},16);});
+}
+
+/* custom cursor */
+const cur=document.getElementById('cur'),curdot=document.getElementById('curdot');
+addEventListener('pointermove',e=>{ curdot.style.left=cur.style.left=e.clientX+'px'; curdot.style.top=cur.style.top=e.clientY+'px'; });
+document.addEventListener('pointerover',e=>{ if(e.target.closest('a,button,[data-cur]')) cur.classList.add('big'); });
+document.addEventListener('pointerout',e=>{ if(e.target.closest('a,button,[data-cur]')) cur.classList.remove('big'); });
+
+/* magnetic buttons */
+document.querySelectorAll('.btn,.nav-cta,.submit,.pb').forEach(b=>{
+  b.addEventListener('pointermove',e=>{ const r=b.getBoundingClientRect();
+    b.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*0.25}px, ${(e.clientY-(r.top+r.height/2))*0.4}px)`; });
+  b.addEventListener('pointerleave',()=>{ b.style.transform=''; });
+});
+
+/* loop */
+const clock=new THREE.Clock();
+function frame(){
+  const t=clock.elapsedTime;
+  ptr.x+=(ptr.tx-ptr.x)*0.06; ptr.y+=(ptr.ty-ptr.y)*0.06;
+
+  // camera cranes & dollies as you scroll, with a constant bob + cursor parallax → always cinematic
+  const az  = -0.5 + scrollP*1.25 + ptr.x*0.22 + Math.sin(t*0.13)*0.03;
+  const R   = 9.0 - scrollP*1.4;
+  const camY= 1.4 - scrollP*0.7 + ptr.y*0.5 + Math.sin(t*0.5)*0.12;
+  camera.position.set(Math.sin(az)*R, camY, Math.cos(az)*R);
+  camera.lookAt(0, 0.55 + ptr.y*0.12, 0);
+
+  // mantis faces the camera at neutral (cursor-centered = facing you); cursor turns it; idle sway keeps it alive
+  mantisRoot.position.y = baseY + Math.sin(t*0.8)*0.05;
+  const targetYaw = az + FACE_OFFSET + ptr.x*0.5 + Math.sin(t*0.45)*0.045;
+  mantis.rotation.y += (targetYaw - mantis.rotation.y)*0.07;
+  mantis.rotation.x += ((-ptr.y*0.12 + Math.sin(t*0.6)*0.02) - mantis.rotation.x)*0.06;
+
+  // moving atmosphere
+  if(dust){ dust.rotation.y = t*0.025; dust.position.y = Math.sin(t*0.3)*0.4; }
+  rim.intensity = 0.7 + Math.sin(t*0.7)*0.15;
+
+  renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+
+/* burger (mobile) */
+document.getElementById('burger').addEventListener('click',()=>{ document.querySelector('.nav-links').style.display='flex'; });
+
+/* boot */
+onScroll();
+requestAnimationFrame(()=>requestAnimationFrame(()=>{ document.getElementById('load').classList.add('gone'); clock.start(); frame(); }));
+</script>
+</body>
+</html>

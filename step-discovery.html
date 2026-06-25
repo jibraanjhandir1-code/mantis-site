@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Discovery & Audit — VELOXIS</title>
+<title>Discovery & Audit — MANTIS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <canvas class="circuit-canvas" id="circuitCanvas"></canvas>
 
 <nav class="nav">
-  <a href="AUTOMATION WEBSITE.html" class="nav-logo"><span class="mk"></span>VELOXIS</a>
+  <a href="AUTOMATION WEBSITE.html" class="nav-logo"><span class="mk"></span>MANTIS</a>
   <a href="AUTOMATION WEBSITE.html#process" class="nav-back">
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M12.5 8H3.5M3.5 8L7.5 4M3.5 8L7.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Back to Process
@@ -205,12 +205,28 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <footer class="footer">
   <div class="container">
     <div class="footer-bottom">
-      <p>© 2026 VELOXIS. All rights reserved.</p>
+      <p>© 2026 MANTIS. All rights reserved.</p>
       <p>Foundational Automation. Delivered Today.™</p>
     </div>
   </div>
 </footer>
 
+<!-- Scroll-reveal animations for section headers (progressive enhancement:
+     without JS the headers simply render normally). -->
+<style>
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+  .reveal.vis{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}}
+</style>
+<script>
+(function(){
+  var heads=document.querySelectorAll('section h1, section h2, section h3, section h4');
+  if(!heads.length) return;
+  if(!('IntersectionObserver' in window)){heads.forEach(function(h){h.classList.add('reveal','vis');});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('vis');io.unobserve(x.target);}});},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  heads.forEach(function(h){h.classList.add('reveal');io.observe(h);});
+})();
+</script>
 <script src="particles.js"></script>
 </body>
 </html>

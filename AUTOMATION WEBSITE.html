@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VELOXIS — Intelligent Automation Systems</title>
-<meta name="description" content="VELOXIS builds enterprise-grade automation systems that eliminate manual work, reduce errors by 97%, and scale operations without scaling headcount.">
+<title>Mantis — Intelligent Automation Systems</title>
+<meta name="description" content="Mantis builds enterprise-grade automation systems that eliminate manual work, reduce errors by 97%, and scale operations without scaling headcount.">
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,20 +75,24 @@ ul,ol{list-style:none}::selection{background:var(--pure);color:var(--black)}
 
 /* ══════════ HERO ══════════ */
 .hero{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:110px clamp(20px,4vw,56px) 70px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.006) 2px,rgba(255,255,255,.006) 4px);pointer-events:none;z-index:1}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.006) 2px,rgba(255,255,255,.006) 4px);pointer-events:none;z-index:2}
 /* Circuit board canvas fills hero */
 .circuit-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
-.hud-coord{position:absolute;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.12);letter-spacing:.06em;z-index:2}
+/* ── HERO VIDEO BACKGROUND ── */
+.hero-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:0;opacity:0;pointer-events:none;will-change:opacity;transform:translateZ(0);backface-visibility:hidden}
+.hero-vid.active{opacity:1}
+.hero-vid-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(0,0,0,.28) 0%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.52) 100%);pointer-events:none}
+.hud-coord{position:absolute;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.12);letter-spacing:.06em;z-index:3}
 .hud-coord.tl{top:80px;left:clamp(20px,4vw,56px)}
 .hud-coord.br{bottom:32px;right:clamp(20px,4vw,56px)}
-.hero-content{position:relative;z-index:2;max-width:640px}
+.hero-content{position:relative;z-index:3;max-width:640px;background:rgba(0,0,0,.62);padding:36px 40px 40px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .hero-status{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--silver);margin-bottom:28px;display:flex;align-items:center;gap:10px;opacity:0;animation:fadeIn .7s .2s var(--ease) forwards}
 .hero-status .blink{width:5px;height:5px;background:var(--pure);border-radius:50%;animation:blink 2s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 @keyframes fadeIn{to{opacity:1}}
 
 /* Hero title — text is in HTML, chars wrapped by JS */
-.hero-title{font-size:clamp(36px,5.5vw,64px);font-weight:700;line-height:1.05;letter-spacing:-.02em;color:var(--pure);margin-bottom:20px;opacity:0;animation:fadeIn .6s .3s ease forwards}
+.hero-title{font-size:clamp(28px,3.5vw,44px);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--pure);margin-bottom:20px;opacity:0;animation:fadeIn .6s .3s ease forwards}
 .hero-title .ch{display:inline-block;opacity:0;transform:translateY(40px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
 .hero-title.anim{animation:none;opacity:1}
 .hero-title.anim .ch{opacity:1;transform:none}
@@ -337,6 +341,9 @@ ul,ol{list-style:none}::selection{background:var(--pure);color:var(--black)}
   /* Buttons — full width on small screens */
   .hero-actions{flex-direction:column;align-items:stretch}
   .btn-p,.btn-g{width:100%;justify-content:center;padding:14px 20px}
+  /* Hero title — scale purely with viewport so long words never wrap */
+  .hero-title{font-size:5.5vw;line-height:1.15;letter-spacing:-.01em}
+  .hero-content{padding:24px 20px 28px}
   /* Modal */
   .modal-overlay{padding:16px}
   .modal-box{padding:24px 18px;max-height:92vh}
@@ -362,6 +369,7 @@ ul,ol{list-style:none}::selection{background:var(--pure);color:var(--black)}
   .hero-status{font-size:10px}
   .dlabel{font-size:10px}
   .services-grid{grid-template-columns:1fr}
+  .hero-title{font-size:5.5vw;line-height:1.18}
   .price-grid{grid-template-columns:1fr}
   .pcard{padding:24px 20px}
   .cta-form input,.cta-form textarea,.cta-form select{font-size:16px}
@@ -380,7 +388,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
 <!-- NAV -->
 <nav class="nav" id="nav">
-  <a href="#" class="nav-logo"><span class="mk"></span>VELOXIS</a>
+  <a href="#" class="nav-logo"><span class="mk"></span>MANTIS</a>
   <div class="nav-links">
     <a href="#services">Systems</a><a href="#process">Process</a><a href="#features">Platform</a>
     <a href="#cases">Results</a><a href="#pricing">Pricing</a>
@@ -392,6 +400,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
 <!-- HERO -->
 <section class="hero" id="hero">
+  <video class="hero-vid active" id="heroVidA" autoplay muted playsinline preload="auto"></video>
+  <video class="hero-vid" id="heroVidB" muted playsinline preload="auto"></video>
+  <div class="hero-vid-overlay"></div>
   <span class="hud-coord tl">51.0447° N / 114.0719° W</span>
   <span class="hud-coord br" id="sysStatus"></span>
   <div class="hero-content">
@@ -603,12 +614,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <!-- FOOTER -->
 <footer class="footer"><div class="container">
   <div class="footer-grid">
-    <div class="footer-brand"><div class="nav-logo"><span class="mk"></span>VELOXIS</div><p>Intelligent automation systems that eliminate friction, reduce costs, and scale operations.</p></div>
+    <div class="footer-brand"><div class="nav-logo"><span class="mk"></span>MANTIS</div><p>Intelligent automation systems that eliminate friction, reduce costs, and scale operations.</p></div>
     <div class="footer-col"><h4>Systems</h4><a href="#services">Email Automation</a><a href="#services">Document Processing</a><a href="#services">Workflow Orchestration</a><a href="#services">CRM Integration</a></div>
     <div class="footer-col"><h4>Company</h4><a href="#process">How It Works</a><a href="#cases">Case Studies</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
-    <div class="footer-col"><h4>Connect</h4><a href="mailto:hello@veloxis.io">hello@veloxis.io</a><a href="#">LinkedIn</a><a href="#">Twitter / X</a></div>
+    <div class="footer-col"><h4>Connect</h4><a href="mailto:hello@mantis.io">hello@mantis.io</a><a href="#">LinkedIn</a><a href="#">Twitter / X</a></div>
   </div>
-  <div class="footer-bottom"><p>© 2026 VELOXIS. All rights reserved.</p><p>Foundational Automation. Delivered Today.™</p></div>
+  <div class="footer-bottom"><p>© 2026 Mantis. All rights reserved.</p><p>Foundational Automation. Delivered Today.™</p></div>
 </div></footer>
 
 <!-- MODAL -->
@@ -732,10 +743,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     while(walker.nextNode())nodes.push(walker.currentNode);
     nodes.forEach(node=>{
       const frag=document.createDocumentFragment();
-      for(const c of node.textContent){
-        if(c===' '){frag.appendChild(document.createTextNode(' '))}
-        else{const s=document.createElement('span');s.className='ch';s.style.transitionDelay=i*0.025+'s';s.textContent=c;frag.appendChild(s);i++}
-      }
+      const parts=node.textContent.split(/(\s+)/);
+      parts.forEach(part=>{
+        if(/^\s+$/.test(part)){frag.appendChild(document.createTextNode(part));return}
+        const word=document.createElement('span');
+        word.style.cssText='display:inline-block;white-space:nowrap';
+        for(const c of part){const s=document.createElement('span');s.className='ch';s.style.transitionDelay=i*0.025+'s';s.textContent=c;word.appendChild(s);i++}
+        frag.appendChild(word);
+      });
       node.parentNode.replaceChild(frag,node);
     });
     setTimeout(()=>ht.classList.add('anim'),500);
@@ -854,6 +869,82 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
       `);
     });
   });
+
+  // ── HERO VIDEO BACKGROUND ──
+  (function(){
+    const srcs=[
+      'https://videos.pexels.com/video-files/856356/856356-hd_1920_1080_25fps.mp4',         // Earth rotating in space
+      'https://videos.pexels.com/video-files/854253/854253-hd_1920_1080_24fps.mp4',          // STS shuttle liftoff — thrusters leaving ground
+      'https://videos.pexels.com/video-files/4066335/4066335-uhd_2560_1440_24fps.mp4',       // aerial city at night — UHD
+      'https://videos.pexels.com/video-files/12704618/12704618-uhd_2560_1440_24fps.mp4',     // futuristic city skyline — UHD
+      'https://videos.pexels.com/video-files/4404425/4404425-uhd_2560_1440_24fps.mp4',       // wind turbine drone — UHD
+      'https://videos.pexels.com/video-files/1276083/1276083-hd_1280_720_30fps.mp4',         // solar panels at dawn
+      'https://videos.pexels.com/video-files/6450803/6450803-hd_1920_1080_25fps.mp4',        // robotic car factory
+      'https://videos.pexels.com/video-files/6046358/6046358-uhd_2560_1440_24fps.mp4',       // welding steel sparks — UHD
+      'https://videos.pexels.com/video-files/7035591/7035591-uhd_2560_1440_24fps.mp4',       // 3D printer operating — UHD
+      'https://videos.pexels.com/video-files/4114797/4114797-uhd_2560_1440_25fps.mp4',       // microscope / lab research — UHD
+      'https://videos.pexels.com/video-files/12954782/12954782-hd_1080_1920_30fps.mp4'       // fighter jets in flight — vapor trails
+    ];
+    const CLIP_MS=2000; // ms each clip is visible before crossfade begins
+    let idx=0, clipTimer=null, prepIdx=-1;
+    const vA=document.getElementById('heroVidA');
+    const vB=document.getElementById('heroVidB');
+    if(!vA||!vB)return;
+    let show=vA, prep=vB;
+
+    function loadInto(el,i){el.src=srcs[i];el.load();return i;}
+
+    function scheduleNext(){
+      clearTimeout(clipTimer);
+      clipTimer=setTimeout(advance,CLIP_MS);
+    }
+
+    function advance(){
+      const ni=(idx+1)%srcs.length;
+      if(prepIdx!==ni) prepIdx=loadInto(prep,ni);
+      const myShow=show, myPrep=prep;
+      function swap(){
+        myPrep.removeEventListener('canplay',swap);
+        myPrep.currentTime=0;
+        myPrep.play().catch(()=>{});
+        myPrep.classList.add('active');
+        myShow.classList.remove('active');
+        myShow.pause();
+        idx=ni; show=myPrep; prep=myShow; prepIdx=-1;
+        prepIdx=loadInto(prep,(idx+1)%srcs.length); // preload next-next
+        scheduleNext();
+      }
+      if(myPrep.readyState>=3){swap();}
+      else{myPrep.addEventListener('canplay',swap);}
+    }
+
+    // Boot first clip
+    show.src=srcs[0];
+    show.addEventListener('canplay',function init(){
+      show.removeEventListener('canplay',init);
+      show.play().catch(()=>{});
+      prepIdx=loadInto(prep,1); // preload clip #1 while #0 plays
+      scheduleNext();
+    },{once:true});
+    show.load();
+
+    // Pause when hero fully scrolls out of view; resume when it returns
+    const heroEl=document.getElementById('hero');
+    if(heroEl&&'IntersectionObserver' in window){
+      let inView=true;
+      new IntersectionObserver(([e])=>{
+        if(e.isIntersecting&&!inView){
+          inView=true;
+          show.play().catch(()=>{});
+          scheduleNext();
+        }else if(!e.isIntersecting&&inView){
+          inView=false;
+          vA.pause();vB.pause();
+          clearTimeout(clipTimer);
+        }
+      },{threshold:0}).observe(heroEl);
+    }
+  })();
 
 })();
 </script>
