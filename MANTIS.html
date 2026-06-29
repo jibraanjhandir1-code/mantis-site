@@ -202,8 +202,11 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 .wiz-x{position:absolute;top:clamp(20px,4vw,40px);right:clamp(20px,4vw,40px);width:46px;height:46px;border:1px solid var(--panelb);
   border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:18px;color:var(--soft);transition:all .3s}
 .wiz-x:hover{border-color:var(--silver);color:var(--ink)}
-.wiz-step{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);margin-bottom:30px}
+.wiz-step{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);margin-bottom:22px}
 .wiz-step b{color:var(--silver)}
+.wiz-kick{font-family:var(--mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--silver);margin-bottom:18px;
+  opacity:0;transform:translateY(14px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.wiz-kick.show{opacity:1;transform:none}
 .wiz-line{font-size:clamp(26px,4.4vw,52px);font-weight:600;line-height:1.12;letter-spacing:-.02em;min-height:2.4em;
   display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(20px);transition:opacity .55s var(--ease),transform .55s var(--ease)}
 .wiz-line.show{opacity:1;transform:none}
@@ -346,6 +349,7 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
   <button class="wiz-x" id="wizClose" data-cur>×</button>
   <div class="wiz-inner">
     <div class="wiz-step">Step <b id="wizN">1</b> / <span id="wizT">6</span></div>
+    <div class="wiz-kick" id="wizKick"></div>
     <div class="wiz-line" id="wizLine"></div>
     <div class="wiz-nav">
       <button class="wiz-btn" id="wizPrev" data-cur>← Back</button>
@@ -369,12 +373,12 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 /* ============ DATA ============ */
 const WIZARD = [
-  `This isn't a system you'll find <em>anywhere else.</em>`,
-  `Because it doesn't exist anywhere <em>but on your computer.</em>`,
-  `We sit and look directly at the <em>problem you're facing.</em>`,
-  `You have a specific solution in mind for the problem you came to us with — and <em>we're going to bring it to life.</em>`,
-  `We work directly with your tools and systems, changing nothing <em>except the speed you work at.</em>`,
-  `We limit our clients — so everyone we work with actually has a problem solved, and <em>the ROI just makes sense.</em>`,
+  ['Not off the shelf', `What we build isn't software you'll find <em>anywhere else.</em>`],
+  ['Yours alone', `It exists nowhere but inside your own systems — <em>built for you, owned by you.</em>`],
+  ['We start with the problem', `We sit down with you and look directly at <em>the problem you're actually facing.</em>`],
+  ['You already have the answer', `You came to us with a specific solution in mind, and our job is to <em>bring it to life.</em>`],
+  ['Inside your own tools', `We work directly within the tools and systems you already use, changing nothing except <em>the speed at which you work.</em>`],
+  ['A limited few', `We take on only a handful of clients, so every engagement solves a real problem — and <em>the ROI simply makes sense.</em>`],
 ];
 const CASES = [
   ['Mortgage · Lending','Document intake, income engine & Filogix autofill','We built a brokerage a hands-off pipeline — client documents in, a fully calculated, Filogix-ready application out. Income figured three ways with GDS/TDS checks and no manual entry.','300 hr','Saved / mo','6 wk','To launch'],
@@ -497,7 +501,7 @@ secs.forEach(s=>io.observe(s));
 
 /* ── process wizard ── */
 (function(){
-  const wiz=document.getElementById('wiz'), line=document.getElementById('wizLine'),
+  const wiz=document.getElementById('wiz'), line=document.getElementById('wizLine'), kick=document.getElementById('wizKick'),
         nEl=document.getElementById('wizN'), tEl=document.getElementById('wizT'),
         prev=document.getElementById('wizPrev'), next=document.getElementById('wizNext'),
         dots=document.getElementById('wizDots');
@@ -507,8 +511,9 @@ secs.forEach(s=>io.observe(s));
   const dotEls=[...dots.children];
   function render(){
     nEl.textContent=idx+1;
-    line.classList.remove('show');
-    setTimeout(()=>{ line.innerHTML='<span>'+WIZARD[idx]+'</span>'; line.classList.add('show'); },180);
+    line.classList.remove('show'); kick.classList.remove('show');
+    setTimeout(()=>{ kick.textContent=WIZARD[idx][0]; line.innerHTML='<span>'+WIZARD[idx][1]+'</span>';
+      kick.classList.add('show'); line.classList.add('show'); },180);
     prev.disabled=idx===0;
     next.textContent = idx===WIZARD.length-1 ? 'Get in touch →' : 'Next →';
     dotEls.forEach((d,i)=>d.classList.toggle('on',i===idx));
