@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mantis — Predatory Automation</title>
-<meta name="description" content="Mantis designs intelligent automation systems that hunt down manual work — eliminating errors, reclaiming thousands of hours, and scaling operations without scaling headcount.">
+<title>Mantis — The Apex of Systems</title>
+<meta name="description" content="Mantis builds custom systems that live on your hardware and bend to how you actually work. We build it. You own it. Your data stays with you.">
 <meta name="theme-color" content="#08090b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -194,6 +194,30 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 .fbtm{max-width:var(--maxw);margin:36px auto 0;padding-top:22px;border-top:1px solid var(--panelb);display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--mute);flex-wrap:wrap;gap:10px}
 @media(max-width:760px){.fgrid{grid-template-columns:1fr 1fr}}
 
+/* ── process wizard (full-screen) ── */
+#wiz{position:fixed;inset:0;z-index:95;background:rgba(6,7,9,.86);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+#wiz.on{opacity:1;pointer-events:auto}
+.wiz-inner{width:100%;max-width:880px;padding:0 clamp(24px,6vw,60px);text-align:center}
+.wiz-x{position:absolute;top:clamp(20px,4vw,40px);right:clamp(20px,4vw,40px);width:46px;height:46px;border:1px solid var(--panelb);
+  border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:18px;color:var(--soft);transition:all .3s}
+.wiz-x:hover{border-color:var(--silver);color:var(--ink)}
+.wiz-step{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);margin-bottom:30px}
+.wiz-step b{color:var(--silver)}
+.wiz-line{font-size:clamp(26px,4.4vw,52px);font-weight:600;line-height:1.12;letter-spacing:-.02em;min-height:2.4em;
+  display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(20px);transition:opacity .55s var(--ease),transform .55s var(--ease)}
+.wiz-line.show{opacity:1;transform:none}
+.wiz-line em{font-style:normal;color:var(--silver)}
+.wiz-nav{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:48px}
+.wiz-btn{padding:14px 30px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--panelb);transition:all .3s var(--ease)}
+.wiz-btn:hover{border-color:var(--silver);transform:translateY(-2px)}
+.wiz-btn.prime{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wiz-btn.prime:hover{box-shadow:0 18px 50px -18px rgba(255,255,255,.4)}
+.wiz-btn:disabled{opacity:.3;pointer-events:none}
+.wiz-dots{display:flex;gap:9px;justify-content:center;margin-top:34px}
+.wiz-dots i{width:7px;height:7px;border:1px solid var(--steel);transform:rotate(45deg);transition:all .35s var(--ease);cursor:pointer}
+.wiz-dots i.on{background:var(--silver);border-color:var(--silver)}
+
 /* loader */
 #load{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;transition:opacity .9s ease}
 #load.gone{opacity:0;pointer-events:none}
@@ -220,9 +244,9 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 <nav class="nav" id="nav">
   <a href="#hero" class="brand"><span class="gl"></span>Mantis</a>
   <div class="nav-links">
-    <a href="#systems">Systems</a><a href="#process">Process</a><a href="#platform">Platform</a>
-    <a href="#results">Results</a><a href="#pricing">Pricing</a>
-    <a href="#contact" class="nav-cta">Deploy →</a>
+    <a href="#process">Process</a><a href="#results">Work</a>
+    <a href="#voices">Voices</a>
+    <a href="#contact" class="nav-cta">Get in touch →</a>
   </div>
   <button class="nav-burger" id="burger"><span></span><span></span><span></span></button>
 </nav>
@@ -233,78 +257,37 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
   <!-- HERO -->
   <section class="sec" id="hero" data-spine="Index">
     <div class="wrap">
-      <div class="tag rv">Intelligent Automation Systems · Est. Calgary</div>
-      <h1 class="huge rv d1">The apex of<br>automation.</h1>
-      <div class="hero-row">
-        <div>
-          <p class="lead rv d2">Mantis builds systems that hunt down manual work — striking with precision, eliminating errors, and reclaiming thousands of hours. Your operation, on instinct.</p>
-          <div class="btns rv d3">
-            <a href="#contact" class="btn btn-f" data-cur>Book a strike call →</a>
-            <a href="#platform" class="btn btn-o" data-cur>See the platform</a>
-          </div>
-        </div>
-        <div class="hero-meta rv d4">[ STATUS ]<br>System online · Accepting clients Q2 2026<br>51.0447° N / 114.0719° W</div>
-      </div>
+      <h1 class="huge rv">The apex<br>of systems.</h1>
     </div>
-    <div class="scrollcue"><span>Scroll</span><span class="bar"></span></div>
-  </section>
-
-  <!-- METRICS -->
-  <section class="sec" id="metrics" data-spine="Impact">
-    <div class="wrap">
-      <div class="tag rv">By the numbers</div>
-      <h2 class="big rv d1" style="margin-bottom:46px">Numbers that don’t blink.</h2>
-      <div class="metrics rv d2">
-        <div class="metric"><div class="v" data-c="2400">0</div><div class="l">Hours saved / mo</div></div>
-        <div class="metric"><div class="v" data-c="97" data-s="%">0</div><div class="l">Error reduction</div></div>
-        <div class="metric"><div class="v" data-c="340" data-s="%">0</div><div class="l">Average ROI</div></div>
-        <div class="metric"><div class="v" data-c="48" data-s="hr">0</div><div class="l">Avg deployment</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SYSTEMS -->
-  <section class="sec" id="systems" data-spine="Systems">
-    <div class="wrap">
-      <div class="col">
-        <div class="tag rv">What we build</div>
-        <h2 class="big rv d1">End-to-end automation for real operations.</h2>
-        <p class="lead rv d2">Every system is engineered around how your business actually works — not how a generic tool thinks it should.</p>
-      </div>
-      <div class="grid" id="systemsGrid"></div>
-    </div>
+    <div class="scrollcue"><span class="bar"></span></div>
   </section>
 
   <!-- PROCESS -->
   <section class="sec" id="process" data-spine="Process">
     <div class="wrap">
       <div class="col">
-        <div class="tag rv">How it works</div>
-        <h2 class="big rv d1">First call to fully automated, in four phases.</h2>
-        <p class="lead rv d2">We handle strategy, build, testing, and deployment. You approve the plan and watch it run.</p>
+        <h2 class="big rv">How we operate.</h2>
+        <p class="lead rv d1">We don't sell you software. We sit beside you, look directly at the problem you're facing, and build the answer into the tools you already use.</p>
+        <div class="btns rv d2">
+          <button class="btn btn-f" id="openWizard" data-cur>Click to see how the process works →</button>
+        </div>
       </div>
-      <div class="flow" id="flow"></div>
-    </div>
-  </section>
-
-  <!-- PLATFORM -->
-  <section class="sec" id="platform" data-spine="Platform">
-    <div class="wrap">
-      <div class="col right" style="text-align:right">
-        <div class="tag rv" style="justify-content:flex-end">The platform</div>
-        <h2 class="big rv d1">Built for operators who refuse to do it manually.</h2>
-        <p class="lead rv d2" style="margin-left:auto">A control center to monitor, adjust, and scale every system — no code required.</p>
-      </div>
-      <div id="platformRows"></div>
     </div>
   </section>
 
   <!-- RESULTS -->
-  <section class="sec" id="results" data-spine="Results">
+  <section class="sec" id="results" data-spine="Work">
     <div class="wrap">
       <div class="col">
-        <div class="tag rv">Results</div>
+        <div class="tag rv">Previous work</div>
         <h2 class="big rv d1">What it looks like done right.</h2>
+        <p class="lead rv d2">Real builds, running in real operations — the process, the impact, and the return.</p>
+      </div>
+      <div class="metrics rv d2" style="margin-top:50px">
+        <div class="metric"><div class="v">$2M+</div><div class="l">Savings generated</div></div>
+        <div class="metric"><div class="v">300 hrs</div><div class="l">Reclaimed / mo</div></div>
+        <div class="metric"><div class="v">340%</div><div class="l">Average client ROI</div></div>
+        <div class="metric"><div class="v">12</div><div class="l">Operations running</div></div>
       </div>
       <div class="grid" id="resultsGrid"></div>
     </div>
@@ -315,15 +298,6 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
     <div class="wrap">
       <div class="col"><div class="tag rv">Field reports</div><h2 class="big rv d1">Trusted by operators who value their time.</h2></div>
       <div class="tg"></div>
-    </div>
-  </section>
-
-  <!-- PRICING -->
-  <section class="sec" id="pricing" data-spine="Pricing">
-    <div class="wrap">
-      <div class="col"><div class="tag rv">Pricing</div><h2 class="big rv d1">Simple pricing. Serious results.</h2>
-      <p class="lead rv d2">Every engagement starts with a free strategy call. No contracts until you see the plan and the projected ROI.</p></div>
-      <div class="price" id="price"></div>
     </div>
   </section>
 
@@ -340,9 +314,9 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
     <div class="wrap">
       <div class="cta-wrap">
         <div>
-          <div class="tag rv">Deploy</div>
-          <h2 class="big rv d1">Stop doing it<br>the hard way.</h2>
-          <p class="lead rv d2">Free strategy call. We map your processes, find the wins, and show projected ROI before you commit to anything.</p>
+          <div class="tag rv">Get in touch</div>
+          <h2 class="big rv d1">Tell us what's<br>broken.</h2>
+          <p class="lead rv d2">We'll tell you if we can fix it. We map your process, find the win, and show the projected return before you commit to anything. We build it, you own it, and your data stays with you.</p>
         </div>
         <form class="glass rv d2" id="form" style="padding:30px">
           <div class="frow"><input type="text" placeholder="Full name" required><input type="email" placeholder="Email" required></div>
@@ -359,13 +333,27 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 
 <footer>
   <div class="fgrid">
-    <div><div class="brand"><span class="gl"></span>Mantis</div><p>Predatory automation systems that hunt down manual work, eliminate errors, and scale operations.</p></div>
-    <div class="fcol"><h4>Systems</h4><a href="#systems">Email automation</a><a href="#systems">Document processing</a><a href="#systems">Workflow orchestration</a><a href="#systems">CRM integration</a></div>
-    <div class="fcol"><h4>Company</h4><a href="#process">How it works</a><a href="#results">Case studies</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
-    <div class="fcol"><h4>Connect</h4><a href="mailto:hello@mantis.io">hello@mantis.io</a><a href="#">LinkedIn</a><a href="#">Twitter / X</a></div>
+    <div><div class="brand"><span class="gl"></span>Mantis</div><p>Custom systems for operators who are done renting software they'll never own. We build it. You own it. Your data stays with you.</p></div>
+    <div class="fcol"><h4>Explore</h4><a href="#process">How we operate</a><a href="#results">Previous work</a><a href="#voices">Voices</a><a href="#faq">FAQ</a></div>
+    <div class="fcol"><h4>Connect</h4><a href="mailto:hello@mantis.io">hello@mantis.io</a><a href="#contact">Get in touch</a><a href="#">LinkedIn</a></div>
+    <div class="fcol"><h4>Located</h4><a href="#">Calgary, AB</a><a href="#">Built &amp; owned locally</a></div>
   </div>
-  <div class="fbtm"><span>© 2026 Mantis. All rights reserved.</span><span>Predatory Automation. Delivered.™</span></div>
+  <div class="fbtm"><span>© 2026 Mantis.</span><span>You own it. Your data stays with you.</span></div>
 </footer>
+
+<!-- PROCESS WIZARD -->
+<div id="wiz" aria-hidden="true">
+  <button class="wiz-x" id="wizClose" data-cur>×</button>
+  <div class="wiz-inner">
+    <div class="wiz-step">Step <b id="wizN">1</b> / <span id="wizT">6</span></div>
+    <div class="wiz-line" id="wizLine"></div>
+    <div class="wiz-nav">
+      <button class="wiz-btn" id="wizPrev" data-cur>← Back</button>
+      <button class="wiz-btn prime" id="wizNext" data-cur>Next →</button>
+    </div>
+    <div class="wiz-dots" id="wizDots"></div>
+  </div>
+</div>
 
 <script type="importmap">
 { "imports": {
@@ -380,39 +368,23 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 /* ============ DATA ============ */
-const SERVICES = [
-  ['001','Email & communication','Intelligent sequences, automated follow-ups, and multi-channel pipelines that deliver the right message at the right time — without anyone pressing send.','Gmail · Outlook · Slack'],
-  ['002','Document processing & OCR','Automated intake, parsing, and routing. Extract data from PDFs, validate against business rules, push to your systems.','PDF · OCR · Parsing'],
-  ['003','Workflow orchestration','Multi-step processes connected across tools. One action completes, the next fires — with error handling and alerts built in.','Zapier · Make · Custom'],
-  ['004','CRM & data integration','Connect CRM, spreadsheets, and databases into a single source of truth. Bi-directional sync and enrichment.','Salesforce · HubSpot · Airtable'],
-  ['005','Dashboards & reporting','Live operational dashboards pulling from every system. Know what’s happening without opening ten tabs.','Analytics · KPIs · Real-time'],
-  ['006','AI-powered qualification','Lead scoring, document verification, and data extraction. Automates the judgment calls humans used to make.','AI · ML · NLP'],
-];
-const STEPS = [
-  ['01','Discovery & audit','We map every manual process, find the bottlenecks, and calculate ROI before a line is built.'],
-  ['02','Architecture','A complete blueprint — data flows, integrations, logic, and error handling.'],
-  ['03','Build & test','Every workflow built, run against edge cases, and validated with real data.'],
-  ['04','Deploy & optimize','Go live with monitoring. We iterate on performance as you scale.'],
-];
-const FEATURES = [
-  ['Real-time analytics','Know exactly what your automation is doing — and saving.',['Live throughput & error monitoring','Cost savings calculated automatically','Custom alerts for anomalies','Executive-ready reports on demand']],
-  ['Workflow engine','Multi-step processes that run flawlessly.',['Visual workflow builder','Conditional branching & loops','Automatic retry on failure','Audit trail for every execution']],
-  ['Integration hub','Connects to every tool your team uses.',['200+ pre-built connectors','Custom API integrations','Bi-directional data sync','Webhook & event triggers']],
+const WIZARD = [
+  `This isn't a system you'll find <em>anywhere else.</em>`,
+  `Because it doesn't exist anywhere <em>but on your computer.</em>`,
+  `We sit and look directly at the <em>problem you're facing.</em>`,
+  `You have a specific solution in mind for the problem you came to us with — and <em>we're going to bring it to life.</em>`,
+  `We work directly with your tools and systems, changing nothing <em>except the speed you work at.</em>`,
+  `We limit our clients — so everyone we work with actually has a problem solved, and <em>the ROI just makes sense.</em>`,
 ];
 const CASES = [
-  ['Healthcare · Ops','Automated patient intake, insurance verification & routing','Replaced a 12-step manual intake with a single pipeline — 3,200+ patients in month one, zero missed verifications.','85%','Less admin','4×','Faster'],
-  ['Professional services','Lead enrichment & scoring from inbound forms','Every lead enriched, scored, and routed with a full brief in under 8 seconds. Unqualified leads auto-handled.','42%','More conv.','0 min','Manual sort'],
-  ['E-commerce · Ops','Inventory, orders & fulfillment across 3 platforms','A real-time sync layer unified Shopify, a 3PL, and QuickBooks. Overselling near zero; close went 5 days → 4 hours.','99.7%','Accuracy','$180k','Saved/yr'],
+  ['Mortgage · Lending','Document intake, income engine & Filogix autofill','We built a brokerage a hands-off pipeline — client documents in, a fully calculated, Filogix-ready application out. Income figured three ways with GDS/TDS checks and no manual entry.','300 hr','Saved / mo','6 wk','To launch'],
+  ['Professional services','Lead enrichment & scoring from inbound forms','Every inbound lead enriched, scored, and routed with a full brief automatically. Reps stop sorting and start closing.','+42%','Conversion','3 wk','To launch'],
+  ['E-commerce · Ops','Inventory, orders & fulfillment across 3 platforms','A real-time sync layer unified Shopify, a 3PL, and QuickBooks. Overselling near zero; the monthly close went from days to hours.','$180k','Saved / yr','5 wk','To launch'],
 ];
 const VOICES = [
   ['We eliminated 30 hours of manual data entry a week. It runs overnight and by morning everything is processed and in the right place. Error rate went from ~8% to basically zero.','JR','James R.','VP Operations, Logistics'],
-  ['ROI was obvious in the first month. What took my team all day now runs in the background. It feels like we added three people without hiring anyone.','SP','Sarah P.','Operations Director, Calgary'],
+  ['A file that used to eat half my morning — sorting T4s, running the income three ways, keying it all into Filogix — is done before my coffee. The numbers match what I’d calculate by hand, every time.','JH','Jordan Haymour','Principal Broker, Calgary'],
   ['They didn’t just automate our process — they rethought it. Cleaner and smarter than anything we’d have designed. Onboarding dropped from two weeks to three days.','MK','Michael K.','CEO, SaaS Startup'],
-];
-const PRICE = [
-  ['Starter','$2,500','/ project','Single automation workflow — designed, built, deployed.',['1 workflow (up to 5 steps)','2 tool integrations','30 days support','Docs & training'],'pb-o','Get started',false],
-  ['Professional','$7,500','/ month','Full buildout with ongoing optimization.',['Unlimited workflows','All integrations','Custom dashboard','Priority support + Slack','Monthly optimization'],'pb-f','Get started',true],
-  ['Enterprise','Custom','','Complex systems, compliance, multi-department.',['Everything in Professional','Dedicated engineer','SLA guarantees','On-premise option','Custom compliance'],'pb-o','Contact sales',false],
 ];
 const FAQ = [
   ['How long does a typical project take?','Most single-workflow projects go live in 1–2 weeks. Full operational buildouts take 4–8 weeks depending on complexity.'],
@@ -425,19 +397,10 @@ const FAQ = [
 
 /* ============ RENDER CONTENT ============ */
 const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
-document.getElementById('systemsGrid').append(...SERVICES.map(([n,h,p,k],i)=>el(
-  `<div class="card rv ${'d'+((i%3)+1)}"><div class="n">${n}</div><h3>${h}</h3><p>${p}</p><span class="k">${k}</span></div>`)));
-document.getElementById('flow').append(...STEPS.map(([ph,h,p],i)=>el(
-  `<div class="step rv ${'d'+(i+1)}"><div class="ph">${ph}</div><h3>${h}</h3><p>${p}</p></div>`)));
-document.getElementById('platformRows').append(...FEATURES.map(([h,p,li],i)=>el(
-  `<div class="feat rv ${'d'+((i%2)+1)}"><div class="ft"><div class="tag" style="margin-bottom:0">Feature 0${i+1}</div><h3>${h}</h3><p>${p}</p><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-   <div class="ft" style="display:grid;place-items:center"><div style="font-family:var(--mono);text-align:center"><div style="font-size:46px;font-weight:700;color:var(--silver)">${['99.9%','4 steps','200+'][i]}</div><div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-top:8px">${['Uptime SLA','Chained per flow','Integrations'][i]}</div></div></div></div>`)));
 document.getElementById('resultsGrid').append(...CASES.map(([tag,h,p,a,al,b,bl],i)=>el(
   `<div class="card rv ${'d'+((i%3)+1)}"><div class="n">${tag}</div><h3>${h}</h3><p>${p}</p><div class="m"><div><b>${a}</b><s>${al}</s></div><div><b>${b}</b><s>${bl}</s></div></div></div>`)));
 document.querySelector('.tg').append(...VOICES.map(([q,av,nm,rl],i)=>el(
   `<div class="tc rv ${'d'+((i%3)+1)}"><q>“${q}”</q><div class="who"><div class="av">${av}</div><div><div class="nm">${nm}</div><div class="rl">${rl}</div></div></div></div>`)));
-document.getElementById('price').append(...PRICE.map(([t,amt,per,pd,li,cls,cta,feat],i)=>el(
-  `<div class="pc rv ${'d'+(i+1)} ${feat?'feat2':''}"><div class="t">${t}</div><div class="amt">${amt} <span>${per}</span></div><div class="pd">${pd}</div><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul><a href="#contact" class="pb ${cls}" data-cur>${cta}</a></div>`)));
 document.querySelector('.faq').append(...FAQ.map(([q,a])=>el(
   `<div class="qa"><button class="q">${q}<span class="pl">+</span></button><div class="a"><p>${a}</p></div></div>`)));
 document.querySelectorAll('.q').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));
@@ -489,7 +452,7 @@ let dust=null;
   dust=new THREE.Points(g,new THREE.PointsMaterial({color:0xcfd4dc,size:.03,transparent:true,opacity:.45,depthWrite:false}));scene.add(dust);})();
 
 const Q=new URLSearchParams(location.search);
-const FACE_OFFSET = Q.has('my') ? parseFloat(Q.get('my')) : -Math.PI/2; // neutral facing: clean profile, head toward the content
+const FACE_OFFSET = Q.has('my') ? parseFloat(Q.get('my')) : -Math.PI + 0.5; // three-quarter face, then flipped 90° clockwise (top view)
 
 const GROUND=-1.9;
 const mantisRoot=new THREE.Group(); scene.add(mantisRoot);
@@ -527,14 +490,39 @@ addEventListener('scroll',onScroll,{passive:true});
 
 /* spine active + reveal */
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in');
-  if(e.target.classList.contains('sec')){ const i=secs.indexOf(e.target); spineLinks.forEach((l,k)=>l.classList.toggle('on',k===i)); if(i===1) runCounters(); } } });},{threshold:0.18});
+  if(e.target.classList.contains('sec')){ const i=secs.indexOf(e.target); spineLinks.forEach((l,k)=>l.classList.toggle('on',k===i)); } } });},{threshold:0.18});
 document.querySelectorAll('.rv').forEach(n=>io.observe(n));
 secs.forEach(s=>io.observe(s));
 
-let counted=false;
-function runCounters(){ if(counted)return; counted=true;
-  document.querySelectorAll('.metric .v').forEach(v=>{const t=+v.dataset.c,suf=v.dataset.s||'';let n=0;const st=t/55;const iv=setInterval(()=>{n+=st;if(n>=t){n=t;clearInterval(iv);}v.textContent=Math.round(n).toLocaleString()+suf;},16);});
-}
+/* ── process wizard ── */
+(function(){
+  const wiz=document.getElementById('wiz'), line=document.getElementById('wizLine'),
+        nEl=document.getElementById('wizN'), tEl=document.getElementById('wizT'),
+        prev=document.getElementById('wizPrev'), next=document.getElementById('wizNext'),
+        dots=document.getElementById('wizDots');
+  let idx=0;
+  tEl.textContent=WIZARD.length;
+  WIZARD.forEach((_,i)=>{const d=document.createElement('i');d.addEventListener('click',()=>go(i));dots.appendChild(d);});
+  const dotEls=[...dots.children];
+  function render(){
+    nEl.textContent=idx+1;
+    line.classList.remove('show');
+    setTimeout(()=>{ line.innerHTML=WIZARD[idx]; line.classList.add('show'); },180);
+    prev.disabled=idx===0;
+    next.textContent = idx===WIZARD.length-1 ? 'Get in touch →' : 'Next →';
+    dotEls.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  }
+  function go(i){ idx=Math.max(0,Math.min(WIZARD.length-1,i)); render(); }
+  function open(){ idx=0; render(); wiz.classList.add('on'); wiz.setAttribute('aria-hidden','false'); }
+  function close(){ wiz.classList.remove('on'); wiz.setAttribute('aria-hidden','true'); }
+  document.getElementById('openWizard').addEventListener('click',open);
+  document.getElementById('wizClose').addEventListener('click',close);
+  prev.addEventListener('click',()=>go(idx-1));
+  next.addEventListener('click',()=>{ if(idx===WIZARD.length-1){ close(); location.hash='#contact'; } else go(idx+1); });
+  wiz.addEventListener('click',e=>{ if(e.target===wiz) close(); });
+  addEventListener('keydown',e=>{ if(!wiz.classList.contains('on'))return;
+    if(e.key==='Escape')close(); else if(e.key==='ArrowRight')go(idx+1); else if(e.key==='ArrowLeft')go(idx-1); });
+})();
 
 /* custom cursor */
 const cur=document.getElementById('cur'),curdot=document.getElementById('curdot');
@@ -553,7 +541,7 @@ document.querySelectorAll('.btn,.nav-cta,.submit,.pb').forEach(b=>{
 const clock=new THREE.Clock();
 function frame(){
   const t=clock.elapsedTime;
-  ptr.x+=(ptr.tx-ptr.x)*0.06; ptr.y+=(ptr.ty-ptr.y)*0.06;
+  ptr.x+=(ptr.tx-ptr.x)*0.12; ptr.y+=(ptr.ty-ptr.y)*0.12;
 
   // camera cranes & dollies as you scroll, with a constant bob + cursor parallax → always cinematic
   const az  = -0.5 + scrollP*1.25 + ptr.x*0.22 + Math.sin(t*0.13)*0.03;
@@ -564,9 +552,9 @@ function frame(){
 
   // mantis faces the camera at neutral (cursor-centered = facing you); cursor turns it; idle sway keeps it alive
   mantisRoot.position.y = baseY + Math.sin(t*0.8)*0.05;
-  const targetYaw = az + FACE_OFFSET + ptr.x*0.5 + Math.sin(t*0.45)*0.045;
-  mantis.rotation.y += (targetYaw - mantis.rotation.y)*0.07;
-  mantis.rotation.x += ((-ptr.y*0.12 + Math.sin(t*0.6)*0.02) - mantis.rotation.x)*0.06;
+  const targetYaw = az + FACE_OFFSET + ptr.x*0.8 + Math.sin(t*0.45)*0.02;
+  mantis.rotation.y += (targetYaw - mantis.rotation.y)*0.14;
+  mantis.rotation.x += ((-ptr.y*0.22 + Math.sin(t*0.6)*0.012) - mantis.rotation.x)*0.12;
 
   // moving atmosphere
   if(dust){ dust.rotation.y = t*0.025; dust.position.y = Math.sin(t*0.3)*0.4; }
