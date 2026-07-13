@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mantis — The Apex of Systems</title>
-<meta name="description" content="Mantis builds custom systems that live on your hardware and bend to how you actually work. We build it. You own it. Your data stays with you.">
+<title>Mantis — Creating the software you know you need</title>
+<meta name="description" content="Creating the software you know you need. Mantis builds custom systems that live on your hardware and bend to how you actually work. We build it. You own it. Your data stays with you.">
 <meta name="theme-color" content="#08090b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#08090b; --bg2:#0c0e12; --panel:rgba(16,18,22,.55); --panelb:rgba(255,255,255,.08);
   --ink:#eef0f3; --soft:#aab0b8; --mute:#7c828c; --dim:#4d525b;
   --silver:#c7ccd4; --steel:#5b6470;
-  --disp:'Space Grotesk',system-ui,sans-serif; --mono:'Space Mono',monospace;
+  --disp:'Inter',system-ui,-apple-system,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
   --ease:cubic-bezier(.2,.9,.25,1);
   --maxw:1280px;
 }
@@ -70,13 +70,13 @@ ul{list-style:none}
 
 /* ── content shell ── */
 main{position:relative;z-index:10}
-.sec{min-height:100vh;display:flex;align-items:center;padding:120px clamp(20px,5vw,52px) 90px;position:relative}
+.sec{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:120px clamp(20px,5vw,52px) 90px;position:relative}
 .wrap{width:100%;max-width:var(--maxw);margin:0 auto}
 .col{max-width:560px}
 .col.right{margin-left:auto}
 .tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:10px;margin-bottom:22px}
 .tag::before{content:'';width:24px;height:1px;background:var(--steel)}
-h1.huge{font-size:clamp(48px,9vw,128px);font-weight:600;line-height:.92;letter-spacing:-.03em}
+h1.huge{font-size:clamp(36px,6.8vw,96px);font-weight:600;line-height:1.02;letter-spacing:-.03em}
 h2.big{font-size:clamp(30px,4.6vw,60px);font-weight:600;line-height:1.02;letter-spacing:-.02em}
 .lead{font-size:clamp(15px,1.5vw,19px);color:var(--soft);max-width:48ch;margin-top:22px;line-height:1.7}
 .glass{background:var(--panel);border:1px solid var(--panelb);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -87,7 +87,7 @@ h2.big{font-size:clamp(30px,4.6vw,60px);font-weight:600;line-height:1.02;letter-
 .rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
 
 /* hero */
-#hero{align-items:flex-end;min-height:100vh}
+#hero{align-items:flex-end;min-height:100vh;min-height:100svh}
 .hero-row{display:flex;justify-content:space-between;align-items:flex-end;width:100%;gap:30px;flex-wrap:wrap}
 .hero-meta{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.12em;max-width:280px;line-height:1.8}
 .btns{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
@@ -240,9 +240,21 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 @keyframes sp{to{transform:rotate(405deg)}}
 
 @media(max-width:760px){
-  .nav-links{display:none}.nav-burger{display:flex}
+  .nav-links{position:fixed;inset:0;z-index:44;background:rgba(8,9,11,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:34px;
+    opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+  .nav-links.open{opacity:1;pointer-events:auto}
+  .nav-links a{font-size:15px}
+  .nav-links a::after{display:none}
+  .nav-burger{display:flex;position:relative;z-index:46}
+  .nav-burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+  .nav-burger.open span:nth-child(2){opacity:0}
+  .nav-burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
   .sec{padding:110px 20px 70px}
+  .frow{grid-template-columns:1fr}
+  .btn{width:100%;justify-content:center}
 }
+@media(max-width:480px){.fgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -271,7 +283,7 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
   <!-- HERO -->
   <section class="sec" id="hero" data-spine="Index">
     <div class="wrap">
-      <h1 class="huge rv">The apex<br>of systems.</h1>
+      <h1 class="huge rv">Creating the software<br>you know you need.</h1>
     </div>
     <div class="scrollcue"><span class="bar"></span></div>
   </section>
@@ -431,12 +443,13 @@ const spineLinks=[...spine.children];
 
 /* ============ 3D MANTIS ============ */
 const canvas=document.getElementById('stage');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const LITE=matchMedia('(max-width:768px), (hover:none)').matches; // phones/tablets: trade shadows & resolution for a steady frame rate
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!LITE,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,LITE?1.5:2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled=!LITE; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x08090b);
@@ -552,8 +565,8 @@ addEventListener('pointermove',e=>{ curdot.style.left=cur.style.left=e.clientX+'
 document.addEventListener('pointerover',e=>{ if(e.target.closest('a,button,[data-cur]')) cur.classList.add('big'); });
 document.addEventListener('pointerout',e=>{ if(e.target.closest('a,button,[data-cur]')) cur.classList.remove('big'); });
 
-/* magnetic buttons */
-document.querySelectorAll('.btn,.nav-cta,.submit,.pb').forEach(b=>{
+/* magnetic buttons (pointer devices only — transforms fight with taps on touch) */
+if(matchMedia('(hover:hover)').matches) document.querySelectorAll('.btn,.nav-cta,.submit,.pb').forEach(b=>{
   b.addEventListener('pointermove',e=>{ const r=b.getBoundingClientRect();
     b.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*0.25}px, ${(e.clientY-(r.top+r.height/2))*0.4}px)`; });
   b.addEventListener('pointerleave',()=>{ b.style.transform=''; });
@@ -588,7 +601,10 @@ function frame(){
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
 /* burger (mobile) */
-document.getElementById('burger').addEventListener('click',()=>{ document.querySelector('.nav-links').style.display='flex'; });
+const burger=document.getElementById('burger'), navLinks=document.querySelector('.nav-links');
+function setMenu(open){ navLinks.classList.toggle('open',open); burger.classList.toggle('open',open); document.body.style.overflow=open?'hidden':''; }
+burger.addEventListener('click',()=>setMenu(!navLinks.classList.contains('open')));
+navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
 
 /* boot */
 onScroll();
