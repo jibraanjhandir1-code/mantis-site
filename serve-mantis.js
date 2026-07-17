@@ -8,7 +8,7 @@ const TYPES = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css',
   '.webp':'image/webp', '.hdr':'application/octet-stream', '.ktx2':'application/octet-stream' };
 http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
-  if (p === '/') p = '/MANTIS.html';
+  if (p === '/') p = '/index.html';
   const fp = path.join(ROOT, p);
   if (!fp.startsWith(ROOT)) { res.writeHead(403); return res.end('forbidden'); }
   fs.readFile(fp, (e, d) => {
