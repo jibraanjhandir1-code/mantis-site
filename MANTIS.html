@@ -3,9 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mantis — Creating the software you know you need</title>
-<meta name="description" content="Creating the software you know you need. Mantis builds custom systems that live on your hardware and bend to how you actually work. We build it. You own it. Your data stays with you.">
+<title>Mantis Systems — Building the software in your industry, you know should exist</title>
+<meta name="description" content="Mantis Systems builds custom software and automation for operators — document processing, system integration, AI workflows. We build it. You own it. Your data stays with you.">
 <meta name="theme-color" content="#08090b">
+<link rel="canonical" href="https://mantissystems.ca/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mantissystems.ca/">
+<meta property="og:site_name" content="Mantis Systems">
+<meta property="og:title" content="Mantis Systems — Building the software in your industry, you know should exist">
+<meta property="og:description" content="Custom software and automation for operators. We build it. You own it. Your data stays with you.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mantis Systems — Building the software in your industry, you know should exist">
+<meta name="twitter:description" content="Custom software and automation for operators. We build it. You own it. Your data stays with you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -76,7 +85,7 @@ main{position:relative;z-index:10}
 .col.right{margin-left:auto}
 .tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:10px;margin-bottom:22px}
 .tag::before{content:'';width:24px;height:1px;background:var(--steel)}
-h1.huge{font-size:clamp(36px,6.8vw,96px);font-weight:600;line-height:1.02;letter-spacing:-.03em}
+h1.huge{font-size:clamp(32px,5.8vw,82px);font-weight:600;line-height:1.05;letter-spacing:-.03em}
 h2.big{font-size:clamp(30px,4.6vw,60px);font-weight:600;line-height:1.02;letter-spacing:-.02em}
 .lead{font-size:clamp(15px,1.5vw,19px);color:var(--soft);max-width:48ch;margin-top:22px;line-height:1.7}
 .glass{background:var(--panel);border:1px solid var(--panelb);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -270,9 +279,9 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 <nav class="nav" id="nav">
   <a href="#hero" class="brand"><span class="gl"></span>Mantis</a>
   <div class="nav-links">
-    <a href="#process">Process</a><a href="#results">Work</a>
+    <a href="#services">Services</a><a href="#process">Process</a><a href="#results">Work</a>
     <a href="#voices">Voices</a>
-    <a href="#contact" class="nav-cta">Get in touch →</a>
+    <a href="#contact" class="nav-cta">Book a consultation →</a>
   </div>
   <button class="nav-burger" id="burger"><span></span><span></span><span></span></button>
 </nav>
@@ -283,20 +292,66 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
   <!-- HERO -->
   <section class="sec" id="hero" data-spine="Index">
     <div class="wrap">
-      <h1 class="huge rv">Creating the software<br>you know you need.</h1>
+      <div class="tag rv">Mantis Systems · Custom software &amp; automation</div>
+      <h1 class="huge rv d1">Building the software<br>in your industry,<br>you know should exist.</h1>
+      <div class="hero-row" style="margin-top:26px">
+        <div>
+          <p class="lead rv d2" style="margin-top:0">Off-the-shelf tools force you to work their way. We design and build the system your operation actually needs — then hand you the keys. We build it. You own it. Your data stays with you.</p>
+          <div class="btns rv d3">
+            <a href="#contact" class="btn btn-f">Book a free consultation →</a>
+            <a href="#results" class="btn btn-o">See the work</a>
+          </div>
+        </div>
+        <div class="hero-meta rv d4">
+          $2M+ client revenue &amp; savings<br>
+          340% average ROI<br>
+          300 hrs reclaimed per month<br>
+          Calgary, AB · Built &amp; owned locally
+        </div>
+      </div>
     </div>
     <div class="scrollcue"><span class="bar"></span></div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="sec" id="services" data-spine="Services">
+    <div class="wrap">
+      <div class="col">
+        <div class="tag rv">What we build</div>
+        <h2 class="big rv d1">Systems that carry the boring work.</h2>
+        <p class="lead rv d2">Every engagement is scoped around one measurable outcome. These are the categories we build in most often.</p>
+      </div>
+      <div class="grid">
+        <div class="card rv d1"><div class="n">01 · WORKFLOW AUTOMATION</div><h3>Workflow &amp; process automation</h3><p>The repetitive back-office work — intake, routing, follow-ups, handoffs — mapped, rebuilt, and run without a human touching it.</p><span class="k">Make · n8n · Custom code</span></div>
+        <div class="card rv d2"><div class="n">02 · DOCUMENT INTELLIGENCE</div><h3>AI document processing</h3><p>Statements, applications, invoices, and forms read, extracted, validated, and pushed into the systems of record — with checks a human would make.</p><span class="k">OCR · LLM extraction · Validation rules</span></div>
+        <div class="card rv d3"><div class="n">03 · INTEGRATION</div><h3>System integration</h3><p>Your CRM, accounting, storefront, and ops tools speaking to each other in real time. One source of truth instead of five copies of it.</p><span class="k">APIs · Webhooks · Sync layers</span></div>
+        <div class="card rv d1"><div class="n">04 · INTERNAL TOOLS</div><h3>Custom internal software</h3><p>The tool your team keeps wishing existed — a calculator, a portal, a pipeline — built precisely to how you already work.</p><span class="k">Web apps · Desktop · On-premise</span></div>
+        <div class="card rv d2"><div class="n">05 · REPORTING</div><h3>Dashboards &amp; reporting</h3><p>Live numbers pulled from where the work actually happens. Decisions made on today's data, not last month's export.</p><span class="k">Real-time · Scheduled digests</span></div>
+        <div class="card rv d3"><div class="n">06 · AI AGENTS</div><h3>AI qualification &amp; agents</h3><p>Inbound leads enriched, scored, and briefed before a rep sees them. Agents that do the sorting so your people do the closing.</p><span class="k">Lead scoring · Enrichment · Triage</span></div>
+      </div>
+      <div class="feat">
+        <div class="ft rv d1"><div class="tag" style="margin-bottom:10px">Ownership</div><h3>You own it outright.</h3><p>No seats, no subscriptions, no platform holding your process hostage. When we hand it over, the system is yours — source, docs, and all.</p><ul><li>Full source code delivered</li><li>No per-user licensing</li><li>Documented for any developer to maintain</li></ul></div>
+        <div class="ft rv d2"><div class="tag" style="margin-bottom:10px">Data</div><h3>Your data stays with you.</h3><p>Systems run on your infrastructure or your cloud accounts. Nothing sensitive routes through ours.</p><ul><li>Deploys on your hardware or cloud</li><li>Least-privilege access, encrypted connections</li><li>On-premise options for regulated work</li></ul></div>
+      </div>
+    </div>
   </section>
 
   <!-- PROCESS -->
   <section class="sec" id="process" data-spine="Process">
     <div class="wrap">
       <div class="col">
-        <h2 class="big rv">How we operate.</h2>
-        <p class="lead rv d1">We don't sell you software. We sit beside you, look directly at the problem you're facing, and build the answer into the tools you already use.</p>
-        <div class="btns rv d2">
-          <button class="btn btn-f" id="openWizard" data-cur>Click to see how the process works →</button>
-        </div>
+        <div class="tag rv">How we operate</div>
+        <h2 class="big rv d1">A fixed process.<br>A measurable outcome.</h2>
+        <p class="lead rv d2">We don't sell you software. We sit beside you, look directly at the problem you're facing, and build the answer into the tools you already use. Every engagement runs the same four phases.</p>
+      </div>
+      <div class="flow">
+        <div class="step rv d1"><div class="ph">01</div><h3>Discovery</h3><p>We map your current process end-to-end, find where the hours go, and identify the single highest-return win.</p></div>
+        <div class="step rv d2"><div class="ph">02</div><h3>Blueprint</h3><p>You get a fixed scope, a fixed price, and a projected ROI in writing — before you commit to anything.</p></div>
+        <div class="step rv d3"><div class="ph">03</div><h3>Build</h3><p>We build inside the tools you already use, with weekly working demos. No black box, no surprises at handoff.</p></div>
+        <div class="step rv d4"><div class="ph">04</div><h3>Launch &amp; support</h3><p>We deploy, train your team, and monitor the system live. You own everything from day one.</p></div>
+      </div>
+      <div class="btns rv d3">
+        <button class="btn btn-o" id="openWizard" data-cur>See the philosophy behind it →</button>
       </div>
     </div>
   </section>
@@ -359,12 +414,12 @@ footer{position:relative;z-index:10;border-top:1px solid var(--panelb);backgroun
 
 <footer>
   <div class="fgrid">
-    <div><div class="brand"><span class="gl"></span>Mantis</div><p>Custom systems for operators who are done renting software they'll never own. We build it. You own it. Your data stays with you.</p></div>
-    <div class="fcol"><h4>Explore</h4><a href="#process">How we operate</a><a href="#results">Previous work</a><a href="#voices">Voices</a><a href="#faq">FAQ</a></div>
-    <div class="fcol"><h4>Connect</h4><a href="mailto:hello@mantis.io">hello@mantis.io</a><a href="#contact">Get in touch</a><a href="#">LinkedIn</a></div>
+    <div><div class="brand"><span class="gl"></span>Mantis Systems</div><p>Custom software and automation for operators who are done renting tools they'll never own. We build it. You own it. Your data stays with you.</p></div>
+    <div class="fcol"><h4>Explore</h4><a href="#services">What we build</a><a href="#process">How we operate</a><a href="#results">Previous work</a><a href="#faq">FAQ</a></div>
+    <div class="fcol"><h4>Connect</h4><a href="mailto:hello@mantissystems.ca">hello@mantissystems.ca</a><a href="#contact">Book a consultation</a><a href="#">LinkedIn</a></div>
     <div class="fcol"><h4>Located</h4><a href="#">Calgary, AB</a><a href="#">Built &amp; owned locally</a></div>
   </div>
-  <div class="fbtm"><span>© 2026 Mantis.</span><span>You own it. Your data stays with you.</span></div>
+  <div class="fbtm"><span>© 2026 Mantis Systems · mantissystems.ca</span><span>We build it. You own it. Your data stays with you.</span></div>
 </footer>
 
 <!-- PROCESS WIZARD -->
